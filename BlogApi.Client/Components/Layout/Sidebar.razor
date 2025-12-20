@@ -1,0 +1,105 @@
+﻿@rendermode InteractiveServer
+
+<div class="drawer-side z-20">
+    <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
+    <aside class="bg-white min-h-screen w-70 p-5 ">
+
+        <div class="mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4">Categories</h3>
+            <ul class="space-y-1">
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 font-semibold cursor-pointer">
+                    <span class="text-xl">💻</span>
+                    <span>All Posts</span>
+                    <span class="ml-auto bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">24</span>
+                </li>
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                    <span class="text-xl text-indigo-500">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                        </svg>
+                    </span>
+                    <span>Blazor</span>
+                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">8</span>
+                </li>
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                    <span class="text-xl text-indigo-500">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                        </svg>
+                    </span>
+                    <span>.NET Core</span>
+                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">12</span>
+                </li>
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                    <span class="text-xl text-indigo-500">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                        </svg>
+                    </span>
+                    <span>CQRS</span>
+                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">5</span>
+                </li>
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                    <span class="text-xl text-indigo-500">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                        </svg>
+                    </span>
+                    <span>Authentication</span>
+                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">6</span>
+                </li>
+                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                    <span class="text-xl text-indigo-500">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                        </svg>
+                    </span>
+                    <span>Web API</span>
+                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">9</span>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="mb-6 bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-2xl text-white">
+            <h3 class="text-xs font-bold uppercase tracking-wider mb-3">Newsletter</h3>
+            <p class="text-sm mb-4 opacity-95 leading-relaxed">
+                Get the latest posts delivered right to your inbox
+            </p>
+            <form class="flex flex-col gap-3">
+                <input type="email"
+                       placeholder="Your email address"
+                       class="px-3 py-3 bg-white/20 backdrop-blur-lg border-none rounded-lg text-sm text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50" />
+                <button type="submit"
+                        class="bg-white text-indigo-600 px-3 py-3 rounded-lg font-semibold hover:-translate-y-0.5 transition-transform">
+                    Subscribe
+                </button>
+            </form>
+        </div>
+
+
+        <div class="mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4">Popular Tags</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    blazor-server
+                </span>
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    mediatr
+                </span>
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    cqrs
+                </span>
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    authentication
+                </span>
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    google-login
+                </span>
+                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                    clean-architecture
+                </span>
+            </div>
+        </div>
+    </aside>
+</div>

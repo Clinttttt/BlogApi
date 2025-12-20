@@ -1,0 +1,308 @@
+﻿@page "/viewblog/{id:int}"
+@rendermode InteractiveServer
+
+<div class="h-screen bg-gray-50 py-8 overflow-auto">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Article Header -->
+        <article class="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
+            <!-- Category Badge -->
+            <div class="px-8 pt-8">
+                <span class="inline-block bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-semibold">
+                    @blogPost.Category
+                </span>
+            </div>
+
+            <!-- Title -->
+            <div class="px-8 pt-4 pb-6">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                    @blogPost.Title
+                </h1>
+
+                <!-- Meta Info -->
+                <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>@blogPost.Author</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>@blogPost.Date</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>@blogPost.ReadTime</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            <div class="w-full h-96 overflow-hidden">
+                <img src="/img/cqrs.png" class="w-full h-full object-cover" alt="@blogPost.Title" />
+            </div>
+
+            <!-- Action Bar -->
+            <div class="px-8 py-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button @onclick="HandleLike"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors @(isLiked ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">
+                            <svg class="w-5 h-5 @(isLiked ? "fill-current" : "")" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span class="font-semibold">@likeCount</span>
+                        </button>
+
+                        <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            <span class="font-semibold">Share</span>
+                        </button>
+                    </div>
+
+                    <button @onclick="() => isBookmarked = !isBookmarked"
+                            class="p-2 rounded-lg transition-colors @(isBookmarked ? "bg-indigo-50 text-indigo-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">
+                        <svg class="w-5 h-5 @(isBookmarked ? "fill-current" : "")" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Article Content -->
+            <div class="px-8 py-8">
+                <div class="prose prose-lg max-w-none">
+                    <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                        Command Query Responsibility Segregation (CQRS) is a powerful architectural pattern that separates read and write operations into different models. When combined with MediatR, it provides a clean and maintainable way to structure your .NET applications.
+                    </p>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">What is CQRS?</h2>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        CQRS stands for Command Query Responsibility Segregation. It's a pattern that separates the responsibility of commands (write operations) and queries (read operations) into different models. This separation allows you to optimize each side independently.
+                    </p>
+
+                    <div class="bg-gray-100 border-l-4 border-indigo-500 p-6 my-6 rounded-r-lg">
+                        <p class="text-gray-800 italic">
+                            "CQRS is not just about splitting your data model, it's about thinking differently about how your application handles reads and writes."
+                        </p>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">Why Use MediatR?</h2>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        MediatR is a simple mediator implementation in .NET that helps implement the mediator pattern. It reduces coupling between components by having them communicate through a mediator rather than directly with each other.
+                    </p>
+
+                    <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">Key Benefits:</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6 ml-4">
+                        <li>Decouples your request/response logic</li>
+                        <li>Makes testing easier</li>
+                        <li>Provides a clear structure for handlers</li>
+                        <li>Supports pipeline behaviors for cross-cutting concerns</li>
+                    </ul>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">Getting Started</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        First, install the MediatR NuGet package:
+                    </p>
+
+                    <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-6"><code>dotnet add package MediatR
+dotnet add package MediatR.Extensions.Microsoft.DependencyInjection</code></pre>
+
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        Then register MediatR in your Program.cs or Startup.cs file. This will scan your assemblies and register all handlers automatically.
+                    </p>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">Conclusion</h2>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        CQRS with MediatR provides a clean architecture for your .NET applications. While it adds some complexity, the benefits in maintainability, testability, and scalability are worth it for medium to large applications.
+                    </p>
+                </div>
+
+                <!-- Tags -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var tag in blogPost.Tags)
+                        {
+                            <span class="bg-gray-200 px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-300 transition-colors">
+                                @tag
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Comments Section -->
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Comments (@comments.Count)
+            </h2>
+
+            <!-- Comment Form -->
+            <div class="mb-8">
+                <EditForm Model="@commentForm" OnValidSubmit="HandleSubmitComment">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                                YO
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <InputTextArea @bind-Value="commentForm.Content"
+                                           placeholder="Add a comment..."
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                           rows="3" />
+                            <div class="mt-3 flex justify-end">
+                                <button type="submit"
+                                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                                    Post Comment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+
+            <!-- Comments List -->
+            <div class="space-y-6">
+                @foreach (var comment in comments)
+                {
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                @comment.Avatar
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-900">@comment.Author</h4>
+                                    <span class="text-sm text-gray-500">@comment.Date</span>
+                                </div>
+                                <p class="text-gray-700 leading-relaxed">@comment.Content</p>
+                            </div>
+                            <div class="mt-2 flex items-center gap-4 text-sm">
+                                <button class="flex items-center gap-1 text-gray-600 hover:text-indigo-600 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                    </svg>
+                                    <span>@comment.Likes</span>
+                                </button>
+                                <button class="text-gray-600 hover:text-indigo-600 transition-colors">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool isLiked = false;
+    private bool isBookmarked = false;
+    private int likeCount = 42;
+
+    private BlogPost blogPost = new()
+    {
+        Title = "Getting Started with CQRS and MediatR in .NET",
+        Category = "CQRS",
+        Author = "Tech Blog Author",
+        Date = "Dec 15, 2025",
+        ReadTime = "6 min read",
+        Tags = new List<string> { "cqrs", "mediatr", ".net-core", "clean-architecture" }
+    };
+
+    private List<Comment> comments = new()
+    {
+        new Comment
+        {
+            Id = 1,
+            Author = "John Doe",
+            Avatar = "JD",
+            Date = "2 days ago",
+            Content = "Great article! This really helped me understand CQRS pattern better. Looking forward to implementing this in my project.",
+            Likes = 5
+        },
+        new Comment
+        {
+            Id = 2,
+            Author = "Sarah Smith",
+            Avatar = "SS",
+            Date = "1 day ago",
+            Content = "Thanks for sharing this! The code examples are very clear and practical.",
+            Likes = 3
+        }
+    };
+
+    private CommentForm commentForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load blog post data by Id
+        // blogPost = await BlogService.GetByIdAsync(Id);
+    }
+
+    private void HandleLike()
+    {
+        isLiked = !isLiked;
+        likeCount = isLiked ? likeCount + 1 : likeCount - 1;
+    }
+
+    private void HandleSubmitComment()
+    {
+        if (!string.IsNullOrWhiteSpace(commentForm.Content))
+        {
+            var newComment = new Comment
+            {
+                Id = comments.Count + 1,
+                Author = "You",
+                Avatar = "YO",
+                Date = "Just now",
+                Content = commentForm.Content,
+                Likes = 0
+            };
+
+            comments.Add(newComment);
+            commentForm.Content = string.Empty;
+        }
+    }
+
+    public class BlogPost
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public string ReadTime { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = new();
+    }
+
+    public class Comment
+    {
+        public int Id { get; set; }
+        public string Author { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public int Likes { get; set; }
+    }
+
+    public class CommentForm
+    {
+        public string Content { get; set; } = string.Empty;
+    }
+}

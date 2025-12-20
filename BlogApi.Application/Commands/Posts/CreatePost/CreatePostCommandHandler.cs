@@ -29,7 +29,23 @@ namespace BlogApi.Application.Commands.Posts.CreatePost
                 UserId = request.UserId,
                 CreatedAt = DateTime.UtcNow.AddHours(8),
                 CategoryId = request.CategoryId,
+                Photo = request.Photo,
+                PhotoContent = request.PhotoContent,
+                Author = request.Author,
+                Status = request.Status,
+                readingDuration = request.readingDuration
+
             };
+
+            foreach (var tagid in request.TagIds.Distinct())
+            {
+                post.PostTags.Add(new PostTag
+                {
+                    TagId = tagid,
+                    UserId = request.UserId
+
+                });
+            }
 
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();

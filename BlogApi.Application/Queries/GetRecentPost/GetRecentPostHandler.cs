@@ -19,7 +19,7 @@ namespace BlogApi.Application.Queries.GetRecentPost
         {
            var query = await context.Posts
                 .AsNoTracking()
-                .Where(s=> s.Status == Domain.Entities.Status.Active)
+                .Where(s=> s.Status == Domain.Enum.EntityEnum.Status.Published)
                 .OrderByDescending(s=> s.CreatedAt)
                 .Take(request.Limit)
                 .ToListAsync();

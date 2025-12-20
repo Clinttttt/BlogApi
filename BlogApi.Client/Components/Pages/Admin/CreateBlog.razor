@@ -1,0 +1,419 @@
+﻿@page "/admin/create-blog"
+@rendermode InteractiveServer
+
+<div class="h-screen bg-gray-50 py-8 overflow-auto">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-700">Create New Blog Post</h1>
+                    <p class="text-gray-600 mt-1">Share your knowledge with the developer community</p>
+                </div>
+                <button @onclick="NavigateBack" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <EditForm Model="@blogModel" OnValidSubmit="HandlePublish">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            
+                <div class="lg:col-span-2 space-y-6">
+
+                  
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Post Title *</label>
+                        <InputText @bind-Value="blogModel.Title"
+                                   placeholder="Enter an engaging title for your post..."
+                                   class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                    </div>
+
+                  
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Featured Image</label>
+
+                        @if (string.IsNullOrEmpty(blogModel.FeaturedImageUrl))
+                        {
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer">
+                                <InputFile OnChange="HandleImageUpload" class="hidden" id="imageUpload" accept="image/*" />
+                                <label for="imageUpload" class="cursor-pointer">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-gray-600 mb-1">Click to upload or drag and drop</p>
+                                    <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="relative">
+                                <img src="@blogModel.FeaturedImageUrl" class="w-full h-64 object-cover rounded-lg" alt="Featured" />
+                                <button type="button" @onclick="RemoveImage"
+                                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                  
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Content *</label>
+                        <div class="mb-3 flex items-center gap-2 pb-3 border-b border-gray-200">
+                            <button type="button" class="p-2 hover:bg-gray-100 rounded" title="Bold">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
+                                </svg>
+                            </button>
+                            <button type="button" class="p-2 hover:bg-gray-100 rounded" title="Italic">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                            </button>
+                            <div class="w-px h-6 bg-gray-300"></div>
+                            <button type="button" class="p-2 hover:bg-gray-100 rounded" title="Code Block">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                            </button>
+                            <button type="button" class="p-2 hover:bg-gray-100 rounded" title="Insert Image">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <InputTextArea @bind-Value="blogModel.Content"
+                                       placeholder="Write your content here... (Markdown supported)"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                       rows="24" />
+                        <p class="text-sm text-gray-500 mt-2">
+                            Supports Markdown formatting. Use ## for headings, **bold**, *italic*, ```code blocks```
+                        </p>
+                    </div>
+
+                </div>
+
+            
+                <div class="lg:col-span-1 space-y-6">
+
+                 
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Publish Settings</h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <InputSelect @bind-Value="blogModel.Status"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="draft">Draft</option>
+                                    <option value="published">Published</option>
+                                </InputSelect>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Author</label>
+                                <InputText @bind-Value="blogModel.Author"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Publish Date</label>
+                                <InputDate @bind-Value="blogModel.PublishDate"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Read</label>
+                                 <InputSelect @bind-Value="blogModel.Status"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="draft">5 Minutes</option>
+                                    <option value="published">10 Minutes</option>
+                                    <option value="published">15 Minutes</option>
+                                    <option value="published">20 Minutes</option>
+                                    <option value="published">25 Minutes</option>
+                                    <option value="published">30 Minutes</option>
+                                    <option value="published">35 Minutes</option>
+                                    <option value="published">25 Minutes</option>
+                                    <option value="published">30 Minutes</option>
+                                    <option value="published">35 Minutes</option>
+                                    <option value="published">40 Minutes</option>
+                                    <option value="published">45 Minutes</option>
+                                    <option value="published">50 Minutes</option>
+                                    <option value="published">55 Minutes</option>
+                                    <option value="published">1 hour</option>
+                                    <option value="published">1 hour +</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+
+                 
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Category</h3>
+
+                        @if (!showNewCategory)
+                        {
+                            <div class="space-y-3">
+                                <InputSelect @bind-Value="blogModel.Category"
+                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">Select a category</option>
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
+                                </InputSelect>
+                                <button type="button" @onclick="() => showNewCategory = true"
+                                        class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                    + Create New Category
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="space-y-3">
+                                <InputText @bind-Value="newCategory"
+                                           placeholder="New category name"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                <div class="flex gap-2">
+                                    <button type="button" @onclick="AddCategory"
+                                            class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
+                                        Add
+                                    </button>
+                                    <button type="button" @onclick="() => { showNewCategory = false; newCategory = string.Empty; }"
+                                            class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                  
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
+
+                      
+                        @if (blogModel.Tags.Any())
+                        {
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                @foreach (var tag in blogModel.Tags)
+                                {
+                                    <span class="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                                        @tag
+                                        <button type="button" @onclick="() => RemoveTag(tag)" class="hover:text-indigo-900">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                }
+                            </div>
+                        }
+
+                      
+                        <div class="space-y-3">
+                            @if (!showNewTag)
+                            {
+                                <div class="space-y-2">
+                                    @foreach (var tag in availableTags.Where(t => !blogModel.Tags.Contains(t)))
+                                    {
+                                        <button type="button" @onclick="() => AddExistingTag(tag)"
+                                                class="w-full px-3 py-2 text-left text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                                            @tag
+                                        </button>
+                                    }
+                                </div>
+                                <button type="button" @onclick="() => showNewTag = true"
+                                        class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                    + Create New Tag
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="space-y-3">
+                                    <InputText @bind-Value="newTag"
+                                               placeholder="New tag name"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                    <div class="flex gap-2">
+                                        <button type="button" @onclick="AddNewTag"
+                                                class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
+                                            Add
+                                        </button>
+                                        <button type="button" @onclick="() => { showNewTag = false; newTag = string.Empty; }"
+                                                class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                   
+                    <div class="space-y-3">
+                        <button type="submit"
+                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Publish Post
+                        </button>
+                        <button type="button" @onclick="SaveDraft"
+                                class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                            Save as Draft
+                        </button>
+                        <button type="button" @onclick="Preview"
+                                class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Preview
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private BlogModel blogModel = new()
+    {
+        Author = "Tech Blog Author",
+        PublishDate = DateTime.Now,
+        Status = "draft"
+    };
+
+    private List<string> categories = new()
+    {
+        "Blazor",
+        ".NET Core",
+        "CQRS",
+        "Authentication",
+        "Web API"
+    };
+
+    private List<string> availableTags = new()
+    {
+        "blazor-server",
+        "mediatr",
+        "cqrs",
+        "authentication",
+        "clean-architecture",
+        ".net-core"
+    };
+
+    private string newCategory = string.Empty;
+    private string newTag = string.Empty;
+    private bool showNewCategory = false;
+    private bool showNewTag = false;
+    private int estimatedReadTime = 0;
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            // In real implementation, upload to server/storage
+            // For now, just simulate
+            blogModel.FeaturedImageUrl = "/img/cqrs.png";
+        }
+    }
+
+    private void RemoveImage()
+    {
+        blogModel.FeaturedImageUrl = string.Empty;
+    }
+
+    private void AddCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategory) && !categories.Contains(newCategory))
+        {
+            categories.Add(newCategory);
+            blogModel.Category = newCategory;
+            showNewCategory = false;
+            newCategory = string.Empty;
+        }
+    }
+
+    private void AddExistingTag(string tag)
+    {
+        if (!blogModel.Tags.Contains(tag))
+        {
+            blogModel.Tags.Add(tag);
+        }
+    }
+
+    private void AddNewTag()
+    {
+        if (!string.IsNullOrWhiteSpace(newTag))
+        {
+            if (!availableTags.Contains(newTag))
+            {
+                availableTags.Add(newTag);
+            }
+            if (!blogModel.Tags.Contains(newTag))
+            {
+                blogModel.Tags.Add(newTag);
+            }
+            showNewTag = false;
+            newTag = string.Empty;
+        }
+    }
+
+    private void RemoveTag(string tag)
+    {
+        blogModel.Tags.Remove(tag);
+    }
+
+    private async Task HandlePublish()
+    {
+        blogModel.Status = "published";
+        // Save to database
+        // await BlogService.CreateAsync(blogModel);
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task SaveDraft()
+    {
+        blogModel.Status = "draft";
+        // Save to database
+        // await BlogService.CreateAsync(blogModel);
+    }
+
+    private void Preview()
+    {
+        // Open preview in new window or navigate to preview page
+        Navigation.NavigateTo($"/preview");
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    public class BlogModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public string FeaturedImageUrl { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = new();
+        public string Author { get; set; } = string.Empty;
+        public DateTime PublishDate { get; set; }
+        public string Status { get; set; } = "draft";
+    }
+}
