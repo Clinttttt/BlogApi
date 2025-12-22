@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
-namespace BlogApi.Application.Commands.Tags.AddTag
+namespace BlogApi.Application.Queries.Tags.GetAllTags
 {
-    public record AddTagCommand(string? Name, Guid UserId) : IRequest<Result<bool>>;
+    public record GetAllTagsQuery(Guid UserId) : IRequest<Result<List<TagDto>>>;
    
 }

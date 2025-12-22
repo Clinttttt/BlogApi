@@ -1,7 +1,8 @@
 ﻿using BlogApi.Api.Shared;
+using BlogApi.Application.Commands.Tags.DeleteTag;
 using BlogApi.Application.Dtos;
-using BlogApi.Application.Queries.GetAllTags;
-using BlogApi.Application.Request;
+using BlogApi.Application.Queries.Tags.GetAllTags;
+using BlogApi.Application.Request.Tag;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,8 +18,8 @@ namespace BlogApi.Api.Controllers
 
 
         [Authorize]
-        [HttpGet("AddTag")]
-        public async Task<ActionResult<TagDto>> Create([FromQuery] AddTagRequest request)
+        [HttpPost("AddTag")]
+        public async Task<ActionResult<bool>> Create([FromBody] AddTagRequest request)
         {
             var command = request.AddTagCommand(UserId);
             var result = await Sender.Send(command);
@@ -26,18 +27,26 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize]
-        [HttpDelete("DeleteTag")]
-        public async Task<ActionResult<bool>> Delete([FromQuery] DeleteTagRequest request)
+        [HttpDelete("DeleteTag/{TagId}")]
+        public async Task<ActionResult<bool>> Delete([FromQuery] int TagId)
         {
-            var command = request.DeleteTagCommand(UserId);
+            var command = new DeleteTagCommand(TagId, UserId);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
         [Authorize]
         [HttpGet("GetAllTags")]
-        public async Task<ActionResult<List<TagDto>>> GetAllTagsQueryHandler([FromQuery] GetAllTagsRequest request)
+        public async Task<ActionResult<List<TagDto>>> GetAllTags()
         {
-            var command = request.GetAllTagRequest(UserId);
+            var command = new GetAllTagsQuery(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+        [Authorize]
+        [HttpPost("AddTagTopost")]
+        public async Task<ActionResult<bool>> AddTagsToPost([FromBody] AddTagsToPostRequest request)
+        {
+            var command = request.AddTagToPostCommand(UserId);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }

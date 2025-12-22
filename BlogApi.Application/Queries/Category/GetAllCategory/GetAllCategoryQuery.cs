@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Tags.AddTag
+namespace BlogApi.Application.Queries.Category.GetAllCategory
 {
-    public record AddTagCommand(string? Name, Guid UserId) : IRequest<Result<bool>>;
+    public record GetAllCategoryQuery(Guid UserId) : IRequest<Result<List<CategoryDto>>>;
    
 }

@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Tags.AddTag
+namespace BlogApi.Application.Queries.Posts.GetPostWithComments
 {
-    public record AddTagCommand(string? Name, Guid UserId) : IRequest<Result<bool>>;
-   
+    public record GetPostWithCommentsQuery(int PostId) : IRequest<Result<PostWithCommentsDto>>;
+    
 }

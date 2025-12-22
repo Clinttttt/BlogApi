@@ -4,7 +4,7 @@ using BlogApi.Application.Commands.Auth.RefreshToken;
 using BlogApi.Application.Commands.Auth.Register;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
-using BlogApi.Application.Request;
+using BlogApi.Application.Request.Auth;
 using BlogApi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

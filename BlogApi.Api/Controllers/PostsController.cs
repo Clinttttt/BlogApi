@@ -2,11 +2,11 @@
 using BlogApi.Application.Dtos;
 
 using BlogApi.Application.Models;
-using BlogApi.Application.Queries.GetPostByTag;
-using BlogApi.Application.Queries.GetPostPaged;
-using BlogApi.Application.Queries.GetPostWithComments;
-using BlogApi.Application.Queries.GetRecentPost;
-using BlogApi.Application.Request;
+using BlogApi.Application.Queries.Posts.GetPostByTag;
+using BlogApi.Application.Queries.Posts.GetPostPaged;
+using BlogApi.Application.Queries.Posts.GetPostWithComments;
+using BlogApi.Application.Queries.Posts.GetRecentPost;
+using BlogApi.Application.Request.Posts;
 using BlogApi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -103,21 +103,14 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
         [Authorize]
-        [HttpGet("PostLike")]
+        [HttpPost("PostLike")]
         public async Task<ActionResult<bool>> PostLike([FromQuery] TogglePostLikeRequest request)
         {
             var command = request.ToggleCommand(UserId);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
-        [HttpPost("AddTagTopost")]
-        public async Task<ActionResult<bool>> AddTagsToPost([FromBody] AddTagsToPostRequest request)
-        {
-            var command = request.AddTagToPostCommand(UserId);
-            var result = await Sender.Send(command);
-            return HandleResponse(result);
-        }
+     
         [AllowAnonymous]
         [HttpPost("GetPostByTag")]
         public async Task<ActionResult<List<PostDto>>> GetPostByTag([FromQuery] GetPostByTagQuery command)

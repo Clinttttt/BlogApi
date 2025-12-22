@@ -24,7 +24,6 @@ namespace BlogApi.Client
             {
                 client.BaseAddress = new Uri("https://localhost:7096");
             });
-
             
             services.AddHttpClient("Api", client =>
             {
