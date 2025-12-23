@@ -19,7 +19,7 @@ namespace BlogApi.Api.Controllers
 
         [Authorize]
         [HttpPost("AddTag")]
-        public async Task<ActionResult<bool>> Create([FromBody] AddTagRequest request)
+        public async Task<ActionResult<int>> Create([FromBody] AddTagRequest request)
         {
             var command = request.AddTagCommand(UserId);
             var result = await Sender.Send(command);

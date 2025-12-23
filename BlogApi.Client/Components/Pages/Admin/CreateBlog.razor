@@ -1,227 +1,204 @@
-﻿@page "/admin/create-blog"
+﻿@*@page "/admin/create-blog"
+
 @rendermode InteractiveServer
+@using BlogApi.Application.Dtos
+@using BlogApi.Application.Request.Category
+@using BlogApi.Application.Request.Tag
+@using BlogApi.Application.Request.Posts
+@using BlogApi.Client.Interface
+@using BlogApi.Domain.Common
+@using BlogApi.Domain.Enum
 @using TinyMCE.Blazor
+@using static BlogApi.Domain.Enum.EntityEnum
+@using Microsoft.AspNetCore.Authorization
+@inject IPostClientService postClient
+@inject ITagClientService tagClient
+@inject ICategoryClientService categoryClient
+@inject NavigationManager Navigation
 
 <div class="h-screen bg-gray-50 py-8 overflow-auto">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-700">Create New Blog Post</h1>
-                    <p class="text-gray-600 mt-1">Share your knowledge with the developer community</p>
+        @if (isLoading)
+        {
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                    <p class="mt-4 text-gray-600">Loading...</p>
                 </div>
-                <button @onclick="NavigateBack" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
-        </div>
-
-        <EditForm Model="@blogModel" OnValidSubmit="HandlePublish">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
-                <div class="lg:col-span-2 space-y-6">
-
-
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Post Title *</label>
-                        <InputText @bind-Value="blogModel.Title"
-                                   placeholder="Enter an engaging title for your post..."
-                                   class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+        }
+        else if (hasError)
+        {
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
                     </div>
-
-
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">Featured Image</label>
-
-                        @if (string.IsNullOrEmpty(blogModel.FeaturedImageUrl))
-                        {
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer">
-                                <InputFile OnChange="HandleImageUpload" class="hidden" id="imageUpload" accept="image/*" />
-                                <label for="imageUpload" class="cursor-pointer">
-                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <p class="text-gray-600 mb-1">Click to upload or drag and drop</p>
-                                    <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                                </label>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="relative">
-                                <img src="@blogModel.FeaturedImageUrl" class="w-full h-64 object-cover rounded-lg" alt="Featured" />
-                                <button type="button" @onclick="RemoveImage"
-                                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        }
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Error loading data</h3>
+                        <p class="mt-1 text-sm text-red-700">@errorMessage</p>
+                        <button @onclick="RetryLoad" class="mt-2 text-sm font-medium text-red-600 hover:text-red-500">
+                            Try again
+                        </button>
                     </div>
-
-
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Content *</label>
-
-                        <Editor ApiKey="pfj9zo4978ac5u36pu475q5zttfik7j191xq1ktkjhgxi4ct"
-                                @bind-Value="blogModel.Content"
-                                Field="@(() => blogModel.Content)"
-                                Conf="@editorConf" />
-
-                      
-                    </div>
-
                 </div>
+            </div>
+        }
+        else
+        {
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-700">Create New Blog Post</h1>
+                        <p class="text-gray-600 mt-1">Share your knowledge with the developer community</p>
+                    </div>
+                    <button @onclick="NavigateBack" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
+            <EditForm Model="@Post" OnValidSubmit="HandlePublish" FormName="CreateBlog">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                <div class="lg:col-span-1 space-y-6">
+                    <div class="lg:col-span-2 space-y-6">
 
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Post Title *</label>
+                            <InputText @bind-Value="Post.Title"
+                                       placeholder="Enter an engaging title for your post..."
+                                       class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                        </div>
 
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Publish Settings</h3>
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Featured Image</label>
 
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                <InputSelect @bind-Value="blogModel.Status"
-                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="draft">Draft</option>
-                                    <option value="published">Published</option>
-                                </InputSelect>
-                            </div>
+                            @if (string.IsNullOrEmpty(previewImageUrl))
+                            {
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer">
+                                    <InputFile OnChange="HandleImageUpload" class="hidden" id="imageUpload" accept="image/*" />
+                                    <label for="imageUpload" class="cursor-pointer">
+                                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="text-gray-600 mb-1">Click to upload or drag and drop</p>
+                                        <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                    </label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="relative">
+                                    <img src="@previewImageUrl" class="w-full h-64 object-cover rounded-lg" alt="Featured" />
+                                    <button type="button" @onclick="RemoveImage"
+                                            class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            }
+                        </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Author</label>
-                                <InputText @bind-Value="blogModel.Author"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                            </div>
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Content *</label>
+                            <Editor ApiKey="pfj9zo4978ac5u36pu475q5zttfik7j191xq1ktkjhgxi4ct"
+                                    @bind-Value="Post.Content"
+                                    Field="@(() => Post.Content)"
+                                    Conf="@editorConf" />
+                        </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Publish Date</label>
-                                <InputDate @bind-Value="blogModel.PublishDate"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Read</label>
-                                <InputSelect @bind-Value="blogModel.EstimatedRead"
-                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="5">5 Minutes</option>
-                                    <option value="10">10 Minutes</option>
-                                    <option value="15">15 Minutes</option>
-                                    <option value="20">20 Minutes</option>
-                                    <option value="25">25 Minutes</option>
-                                    <option value="30">30 Minutes</option>
-                                    <option value="35">35 Minutes</option>
-                                    <option value="40">40 Minutes</option>
-                                    <option value="45">45 Minutes</option>
-                                    <option value="50">50 Minutes</option>
-                                    <option value="55">55 Minutes</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="60+">1 hour +</option>
-                                </InputSelect>
+                    </div>
+
+                    <div class="lg:col-span-1 space-y-6">
+
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Publish Settings</h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                    <InputSelect @bind-Value="Post.Status"
+                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="@EntityEnum.Status.Draft">Draft</option>
+                                        <option value="@EntityEnum.Status.Published">Published</option>
+                                    </InputSelect>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Author</label>
+                                    <InputText @bind-Value="Post.Author"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Publish Date</label>
+                                    <InputDate @bind-Value="PublishedDate"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Read</label>
+                                    <InputSelect @bind-Value="Post.ReadingDuration"
+                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="@ReadingDuration.Minutes5">5 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes10">10 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes15">15 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes20">20 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes25">25 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes30">30 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes35">35 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes40">40 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes45">45 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes50">50 Minutes</option>
+                                        <option value="@ReadingDuration.Minutes55">55 Minutes</option>
+                                        <option value="@ReadingDuration.OneHour">1 Hour</option>
+                                        <option value="@ReadingDuration.OneHourPlus">1 Hour +</option>
+                                    </InputSelect>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Category</h3>
 
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Category</h3>
-
-                        @if (!showNewCategory)
-                        {
-                            <div class="space-y-3">
-                                <InputSelect @bind-Value="blogModel.Category"
-                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="">Select a category</option>
-                                    @foreach (var category in categories)
-                                    {
-                                        <option value="@category">@category</option>
-                                    }
-                                </InputSelect>
-                                <button type="button" @onclick="() => showNewCategory = true"
-                                        class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                                    + Create New Category
-                                </button>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="space-y-3">
-                                <InputText @bind-Value="newCategory"
-                                           placeholder="New category name"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                                <div class="flex gap-2">
-                                    <button type="button" @onclick="AddCategory"
-                                            class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
-                                        Add
-                                    </button>
-                                    <button type="button" @onclick="() => { showNewCategory = false; newCategory = string.Empty; }"
-                                            class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
-
-
-                        @if (blogModel.Tags.Any())
-                        {
-                            <div class="flex flex-wrap gap-2 mb-3">
-                                @foreach (var tag in blogModel.Tags)
-                                {
-                                    <span class="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
-                                        @tag
-                                        <button type="button" @onclick="() => RemoveTag(tag)" class="hover:text-indigo-900">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </span>
-                                }
-                            </div>
-                        }
-
-
-                        <div class="space-y-3">
-                            @if (!showNewTag)
+                            @if (!showNewCategory)
                             {
-                                <div class="space-y-2">
-                                    @foreach (var tag in availableTags.Where(t => !blogModel.Tags.Contains(t)))
-                                    {
-                                        <button type="button" @onclick="() => AddExistingTag(tag)"
-                                                class="w-full px-3 py-2 text-left text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                                            @tag
-                                        </button>
-                                    }
+                                <div class="space-y-3">
+                                    <InputSelect @bind-Value="Post.CategoryId"
+                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">Select a category</option>
+                                        @if (ListCategory?.IsSuccess == true && ListCategory.Value != null)
+                                        {
+                                            @foreach (var category in ListCategory.Value)
+                                            {
+                                                <option value="@category.Id">@category.Name</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                    <button type="button" @onclick="() => showNewCategory = true"
+                                            class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                        + Create New Category
+                                    </button>
                                 </div>
-                                <button type="button" @onclick="() => showNewTag = true"
-                                        class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                                    + Create New Tag
-                                </button>
                             }
                             else
                             {
                                 <div class="space-y-3">
-                                    <InputText @bind-Value="newTag"
-                                               placeholder="New tag name"
+                                    <InputText @bind-Value="newCategory"
+                                               placeholder="New category name"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                                     <div class="flex gap-2">
-                                        <button type="button" @onclick="AddNewTag"
+                                        <button type="button" @onclick="HandleCategory"
                                                 class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
                                             Add
                                         </button>
-                                        <button type="button" @onclick="() => { showNewTag = false; newTag = string.Empty; }"
+                                        <button type="button" @onclick="() => { showNewCategory = false; newCategory = string.Empty; }"
                                                 class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
                                             Cancel
                                         </button>
@@ -229,49 +206,133 @@
                                 </div>
                             }
                         </div>
-                    </div>
 
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
 
-                    <div class="space-y-3">
-                        <button type="submit"
-                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Publish Post
-                        </button>
-                        <button type="button" @onclick="SaveDraft"
-                                class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
-                            Save as Draft
-                        </button>
-                        <button type="button" @onclick="Preview"
-                                class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Preview
-                        </button>
+                            @if (selectedTags.Any())
+                            {
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    @foreach (var tagId in selectedTags)
+                                    {
+                                        var tagName = GetTagNameById(tagId);
+                                        <span class="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                                            @tagName
+                                            <button type="button" @onclick="() => RemoveTag(tagId)" class="hover:text-indigo-900">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    }
+                                </div>
+                            }
+
+                            <div class="space-y-3">
+                                @if (!showNewTag)
+                                {
+                                    <div class="space-y-2">
+                                        @if (ListTag?.IsSuccess == true && ListTag.Value != null)
+                                        {
+                                            @foreach (var tag in ListTag.Value.Where(t => !selectedTags.Contains(t.Id)))
+                                            {
+                                                <button type="button" @onclick="() => AddExistingTag(tag.Id)"
+                                                        class="w-full px-3 py-2 text-left text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                                                    @tag.Name
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                    <button type="button" @onclick="() => showNewTag = true"
+                                            class="w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                        + Create New Tag
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="space-y-3">
+                                        <InputText @bind-Value="newTag"
+                                                   placeholder="New tag name"
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        <div class="flex gap-2">
+                                            <button type="button" @onclick="AddNewTag"
+                                                    class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
+                                                Add
+                                            </button>
+                                            <button type="button" @onclick="() => { showNewTag = false; newTag = string.Empty; }"
+                                                    class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button type="submit" disabled="@isSaving"
+                                    class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                @if (isSaving)
+                                {
+                                    <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    <span>Publishing...</span>
+                                }
+                                else
+                                {
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Publish Post</span>
+                                }
+                            </button>
+                            <button type="button" @onclick="SaveDraft" disabled="@isSaving"
+                                    class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                Save as Draft
+                            </button>
+                            <button type="button" @onclick="Preview"
+                                    class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Preview
+                            </button>
+                        </div>
+
                     </div>
 
                 </div>
-
-            </div>
-        </EditForm>
+            </EditForm>
+        }
 
     </div>
 </div>
 
 @code {
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    public Result<List<TagDto>>? ListTag { get; set; }
+    public Result<List<CategoryDto>>? ListCategory { get; set; }
+    private bool hasrender = false;
+    private bool isLoading = true;
+    private bool hasError = false;
+    private bool isSaving = false;
+    private string errorMessage = string.Empty;
+    public DateTime PublishedDate { get; set; }
 
-    private BlogModel blogModel = new()
+    public PostRequest Post { get; set; } = new PostRequest
     {
-        Author = "Tech Blog Author",
-        PublishDate = DateTime.Now,
-        Status = "draft",
-        EstimatedRead = "5"
+        Status = EntityEnum.Status.Draft,
+        ReadingDuration = ReadingDuration.Minutes5
     };
+
+    private AddCategoryRequest AddCat { get; set; } = new AddCategoryRequest();
+    private AddTagRequest AddTag { get; set; } = new AddTagRequest();
+
+    private List<int> selectedTags = new List<int>();
+    private string newCategory = string.Empty;
+    private string newTag = string.Empty;
+    private bool showNewCategory = false;
+    private bool showNewTag = false;
+    private string previewImageUrl = string.Empty;
 
     private Dictionary<string, object> editorConf = new()
     {
@@ -282,103 +343,223 @@
         { "toolbar", "undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code" }
     };
 
-    private List<string> categories = new()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        "Blazor",
-        ".NET Core",
-        "CQRS",
-        "Authentication",
-        "Web API"
-    };
+        if (firstRender && !hasrender)
+        {
+            hasrender = true;
+            await LoadDataAsync();
+        }
+    }
 
-    private List<string> availableTags = new()
+    private async Task LoadDataAsync()
     {
-        "blazor-server",
-        "mediatr",
-        "cqrs",
-        "authentication",
-        "clean-architecture",
-        ".net-core"
-    };
+        isLoading = true;
+        hasError = false;
+        StateHasChanged();
 
-    private string newCategory = string.Empty;
-    private string newTag = string.Empty;
-    private bool showNewCategory = false;
-    private bool showNewTag = false;
+        try
+        {
+            PublishedDate = DateTime.UtcNow.AddHours(8);
+
+            // Increase delay to ensure token is saved and retrievable
+            await Task.Delay(200); // Changed from 50ms to 200ms
+
+            ListCategory = await categoryClient.GetListing();
+            ListTag = await tagClient.GetAllTags();
+
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            isLoading = false;
+            hasError = true;
+            errorMessage = "Authentication failed. Please log in again.";
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            isLoading = false;
+            hasError = true;
+            errorMessage = "Failed to load data. Please try again.";
+            StateHasChanged();
+        }
+    }
+
+    private async Task RetryLoad()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task HandleCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategory))
+        {
+            try
+            {
+                AddCat.Name = newCategory;
+                var result = await categoryClient.Create(AddCat);
+
+                if (result?.IsSuccess == true)
+                {
+                    ListCategory = await categoryClient.GetListing();
+                    showNewCategory = false;
+                    newCategory = string.Empty;
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating category: {ex.Message}");
+            }
+        }
+        StateHasChanged();
+    }
 
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        if (file != null)
+        if (file != null && file.Size <= 10485760) // 10MB limit
         {
-            // In real implementation, upload to server/storage
-            // For now, just simulate
-            blogModel.FeaturedImageUrl = "/img/cqrs.png";
+            using var stream = file.OpenReadStream(maxAllowedSize: 10485760);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            Post.Photo = memoryStream.ToArray();
+            Post.PhotoContent = file.ContentType;
+
+            var base64 = Convert.ToBase64String(Post.Photo);
+            previewImageUrl = $"data:{file.ContentType};base64,{base64}";
         }
     }
 
     private void RemoveImage()
     {
-        blogModel.FeaturedImageUrl = string.Empty;
+        Post.Photo = null;
+        Post.PhotoContent = null;
+        previewImageUrl = string.Empty;
     }
 
-    private void AddCategory()
+    private void AddExistingTag(int tagId)
     {
-        if (!string.IsNullOrWhiteSpace(newCategory) && !categories.Contains(newCategory))
+        if (!selectedTags.Contains(tagId))
         {
-            categories.Add(newCategory);
-            blogModel.Category = newCategory;
-            showNewCategory = false;
-            newCategory = string.Empty;
+            selectedTags.Add(tagId);
         }
     }
 
-    private void AddExistingTag(string tag)
-    {
-        if (!blogModel.Tags.Contains(tag))
-        {
-            blogModel.Tags.Add(tag);
-        }
-    }
-
-    private void AddNewTag()
+    private async Task AddNewTag()
     {
         if (!string.IsNullOrWhiteSpace(newTag))
         {
-            if (!availableTags.Contains(newTag))
+            try
             {
-                availableTags.Add(newTag);
+                AddTag.Name = newTag;
+                var result = await tagClient.Create(AddTag);
+
+                if (result?.IsSuccess == true && result.Value > 0)
+                {
+                    ListTag = await tagClient.GetAllTags();
+                    selectedTags.Add(result.Value);
+                    showNewTag = false;
+                    newTag = string.Empty;
+                }
             }
-            if (!blogModel.Tags.Contains(newTag))
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                blogModel.Tags.Add(newTag);
+                Navigation.NavigateTo("/login", forceLoad: true);
             }
-            showNewTag = false;
-            newTag = string.Empty;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating tag: {ex.Message}");
+            }
         }
+        StateHasChanged();
     }
 
-    private void RemoveTag(string tag)
+    private void RemoveTag(int tagId)
     {
-        blogModel.Tags.Remove(tag);
+        selectedTags.Remove(tagId);
+    }
+
+    private string GetTagNameById(int tagId)
+    {
+        if (ListTag?.IsSuccess == true && ListTag.Value != null)
+        {
+            var tag = ListTag.Value.FirstOrDefault(t => t.Id == tagId);
+            return tag?.Name ?? string.Empty;
+        }
+        return string.Empty;
     }
 
     private async Task HandlePublish()
     {
-        blogModel.Status = "published";
-       
-        Navigation.NavigateTo("/");
+        isSaving = true;
+        try
+        {
+            Post.Status = EntityEnum.Status.Published;
+            Post.TagIds = selectedTags;
+
+            var result = await postClient.Create(Post);
+
+            if (result?.IsSuccess == true)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error publishing post: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 
     private async Task SaveDraft()
     {
-        blogModel.Status = "draft";
-        
+        isSaving = true;
+        try
+        {
+            Post.Status = EntityEnum.Status.Draft;
+            Post.TagIds = selectedTags;
+
+            var result = await postClient.Create(Post);
+
+            if (result?.IsSuccess == true)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving draft: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 
     private void Preview()
     {
-       
         Navigation.NavigateTo($"/preview");
     }
 
@@ -386,17 +567,4 @@
     {
         Navigation.NavigateTo("/");
     }
-
-    public class BlogModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public string FeaturedImageUrl { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public List<string> Tags { get; set; } = new();
-        public string Author { get; set; } = string.Empty;
-        public DateTime PublishDate { get; set; }
-        public string Status { get; set; } = "draft";
-        public string EstimatedRead { get; set; } = "5";
-    }
-}
+}*@

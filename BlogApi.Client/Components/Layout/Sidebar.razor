@@ -134,6 +134,7 @@
     [JSInvokable]
     public async Task HandleGoogleLoginCallback(string idToken)
     {
+        await Task.Delay(100);
         await GoogleCallback.ProcessLogin(idToken);
     }
 

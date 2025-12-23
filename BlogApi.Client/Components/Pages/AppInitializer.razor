@@ -1,0 +1,33 @@
+﻿@using BlogApi.Client.Security
+@using Microsoft.AspNetCore.Components
+@inject AuthStateProvider AuthStateProvider
+@inject AuthorizationDelegatingHandler AuthHandler
+@implements IDisposable
+
+@ChildContent
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool _initialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
+
+            // Initialize auth state - this loads token from localStorage
+            await AuthStateProvider.InitializeAsync();
+
+            // Force re-render so components can make authenticated requests
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
+}

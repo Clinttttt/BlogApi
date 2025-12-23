@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Tags.AddTag
 {
-    public record AddTagCommand(string? Name, Guid UserId) : IRequest<Result<bool>>;
+    public record AddTagCommand(string? Name, Guid UserId) : IRequest<Result<int>>;
    
 }

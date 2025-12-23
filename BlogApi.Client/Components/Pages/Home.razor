@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@*@page "/"
 
 
 
@@ -126,4 +126,138 @@
 
 @code {
 
+}
+*@
+
+
+@page "/"
+@using BlogApi.Application.Dtos
+@using BlogApi.Client.Interface
+@using BlogApi.Client.Security
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ITagClientService TagService
+@inject AuthStateProvider AuthStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Test Tags - Auth Check</PageTitle>
+
+<h3>Authentication & Tags Test</h3>
+
+<div class="auth-status mb-4">
+ 
+</div>
+
+<hr />
+
+<h4>Tags List (AllowAnonymous)</h4>
+
+@if (isLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading tags...</p>
+}
+else if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @errorMessage
+    </div>
+}
+else if (tags != null && tags.Any())
+{
+    <div class="alert alert-success">
+        <strong>Success!</strong> Found @tags.Count tag(s)
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tag in tags)
+            {
+                <tr>
+                    <td>@tag.Id</td>
+                    <td>@tag.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        No tags found.
+    </div>
+}
+@inject ProtectedLocalStorage LocalStorage
+
+<button @onclick="CheckStorage">Check Storage</button>
+
+@code {
+    private async Task CheckStorage()
+    {
+        var token = await LocalStorage.GetAsync<string>("AccessToken");
+        Console.WriteLine($"Token exists: {token.Success}");
+        Console.WriteLine($"Token length: {token.Value?.Length}");
+    }
+}
+@code {
+    private List<TagDto>? tags;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private bool _hasLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasLoaded)
+        {
+            _hasLoaded = true;
+
+            // Initialize auth state
+            await AuthStateProvider.InitializeAsync();
+
+            // Small delay to ensure JavaScript interop is fully ready
+            await Task.Delay(100);
+
+            // Then load data
+            await LoadTags();
+
+            StateHasChanged(); // Refresh the UI
+        }
+    }
+
+    private async Task LoadTags()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var result = await TagService.GetAllTags();
+
+            if (result.IsSuccess && result.Value != null)
+            {
+                tags = result.Value;
+            }
+            else
+            {
+                errorMessage = "Failed to load tags. Result was not successful.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Exception: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // Ensure UI updates
+        }
+    }
 }

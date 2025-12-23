@@ -1,4 +1,5 @@
 ﻿using BlogApi.Application.Commands.Posts.CreatePost;
+using BlogApi.Domain.Entities;
 using static BlogApi.Domain.Enum.EntityEnum;
 
 public class PostRequest
@@ -11,8 +12,8 @@ public class PostRequest
     public string? Author { get; set; }
     public Status Status { get; set; }
     public ReadingDuration ReadingDuration { get; set; }
-
     public IReadOnlyList<int> TagIds { get; set; } = Array.Empty<int>();
+    public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
 
     public CreatePostCommand SetAddCommand(Guid userId)
         => new(

@@ -1,63 +1,90 @@
-﻿using BlogApi.Application.Dtos;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 
-public class AuthorizationDelegatingHandler : DelegatingHandler
+namespace BlogApi.Client.Security
 {
-    private readonly ProtectedLocalStorage _localStorage;
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public AuthorizationDelegatingHandler(
-        ProtectedLocalStorage localStorage,
-        IHttpClientFactory httpClientFactory)
+    public class AuthorizationDelegatingHandler : DelegatingHandler
     {
-        _localStorage = localStorage;
-        _httpClientFactory = httpClientFactory;
-    }
+        private readonly ProtectedLocalStorage _localStorage;
+        private readonly ILogger<AuthorizationDelegatingHandler> _logger;
 
-    protected override async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
-    {
-        string? token = null;
-        var tokenResult = await _localStorage.GetAsync<string>("AccessToken");
-        token = tokenResult.Success ? tokenResult.Value : null;
+        private static string? _cachedToken;
+        private static DateTime _tokenCacheExpiry = DateTime.MinValue;
+        private static readonly object _cacheLock = new();
 
-        if (string.IsNullOrEmpty(token))
+        public AuthorizationDelegatingHandler(
+            ProtectedLocalStorage localStorage,
+            ILogger<AuthorizationDelegatingHandler> logger)
         {
-          
-            var authClient = _httpClientFactory.CreateClient("AuthClient");
-            var refreshTokenResult = await _localStorage.GetAsync<string>("RefreshToken");
+            _localStorage = localStorage;
+            _logger = logger;
+        }
 
-            if (refreshTokenResult.Success && !string.IsNullOrEmpty(refreshTokenResult.Value))
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            string? token = GetCachedToken() ?? await RetrieveTokenFromStorageAsync();
+
+            if (!string.IsNullOrEmpty(token))
             {
-                try
-                {
-                    var refreshResponse = await authClient.PostAsJsonAsync(
-                        "api/Auth/RefreshToken",
-                        new { RefreshToken = refreshTokenResult.Value },
-                        cancellationToken);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
 
-                    if (refreshResponse.IsSuccessStatusCode)
-                    {
-                        var tokenResponse = await refreshResponse.Content.ReadFromJsonAsync<TokenResponseDto>(cancellationToken: cancellationToken);
-                        if (tokenResponse != null)
-                        {
-                            await _localStorage.SetAsync("AccessToken", tokenResponse.AccessToken);
-                            await _localStorage.SetAsync("RefreshToken", tokenResponse.RefreshToken);
-                            token = tokenResponse.AccessToken;
-                        }
-                    }
-                }
-                catch
-                {                
-                }
+            return await base.SendAsync(request, cancellationToken);
+        }
+
+        private string? GetCachedToken()
+        {
+            lock (_cacheLock)
+            {
+                return !string.IsNullOrEmpty(_cachedToken) && DateTime.UtcNow < _tokenCacheExpiry
+                    ? _cachedToken
+                    : null;
             }
         }
-        if (!string.IsNullOrEmpty(token))
+
+        private async Task<string?> RetrieveTokenFromStorageAsync()
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            try
+            {
+                var tokenResult = await _localStorage.GetAsync<string>("AccessToken");
+
+                if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.Value))
+                {
+                    CacheToken(tokenResult.Value);
+                    return tokenResult.Value;
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                return GetCachedToken();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving token");
+            }
+
+            return null;
         }
-        return await base.SendAsync(request, cancellationToken);
+
+        public static void CacheToken(string token)
+        {
+            lock (_cacheLock)
+            {
+                _cachedToken = token;
+                _tokenCacheExpiry = DateTime.UtcNow.AddMinutes(5);
+            }
+        }
+
+        public static void ClearCache()
+        {
+            lock (_cacheLock)
+            {
+                _cachedToken = null;
+                _tokenCacheExpiry = DateTime.MinValue;
+            }
+        }
     }
 }

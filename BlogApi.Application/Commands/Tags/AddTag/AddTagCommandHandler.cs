@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using IMapper = AutoMapper.IMapper;
 namespace BlogApi.Application.Commands.Tags.AddTag
 {
-    public class AddTagCommandHandler(IAppDbContext context, IMapper mapper) : IRequestHandler<AddTagCommand, Result<bool>>
+    public class AddTagCommandHandler(IAppDbContext context, IMapper mapper) : IRequestHandler<AddTagCommand, Result<int>>
     {
-        public async Task<Result<bool>> Handle(AddTagCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(AddTagCommand request, CancellationToken cancellationToken)
         {
             if (await context.Tags.AnyAsync(s => s.Name == request.Name))
             {
-                return Result<bool>.Conflict();
+                return Result<int>.Conflict();
             }
             var tag = new Tag
             {
@@ -23,8 +23,8 @@ namespace BlogApi.Application.Commands.Tags.AddTag
             };
             context.Tags.Add(tag);
             await context.SaveChangesAsync();
-            var tagdto = mapper.Map<bool>(tag);
-            return Result<bool>.Success(tagdto);
+            var tagdto = mapper.Map<int>(tag);
+            return Result<int>.Success(tag.Id);
 
         }
     }
