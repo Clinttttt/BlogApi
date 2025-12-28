@@ -1,4 +1,4 @@
-﻿using BlogApi.Application.Commands.Posts.ToggleCommentLike;
+﻿using BlogApi.Application.Commands.Comment.LikeComment;
 using System;
 using System.Collections.Generic;
 using System.Linq;

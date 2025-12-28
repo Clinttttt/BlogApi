@@ -1,12 +1,13 @@
 ﻿using BlogApi.Api.Shared;
 using BlogApi.Application.Dtos;
-
 using BlogApi.Application.Models;
 using BlogApi.Application.Queries.Posts.GetAllBookMark;
+using BlogApi.Application.Queries.Posts.GetFeatured;
 using BlogApi.Application.Queries.Posts.GetPostByTag;
 using BlogApi.Application.Queries.Posts.GetPostPaged;
 using BlogApi.Application.Queries.Posts.GetPostWithComments;
 using BlogApi.Application.Queries.Posts.GetRecentPost;
+using BlogApi.Application.Queries.Posts.PostDashboard;
 using BlogApi.Application.Request.Posts;
 using BlogApi.Domain.Common;
 using MediatR;
@@ -98,8 +99,9 @@ namespace BlogApi.Api.Controllers
         }
         [AllowAnonymous]
         [HttpGet("GetRecentPost")]
-        public async Task<ActionResult<List<PostDto>>> GetRecentPost([FromQuery] GetRecentPostQuery command)
+        public async Task<ActionResult<List<PostDto>>> GetRecentPost()
         {
+            var command = new GetRecentPostQuery();
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
@@ -139,6 +141,30 @@ namespace BlogApi.Api.Controllers
         public async Task<ActionResult<List<PostDto>>> GetBookMark()
         {
             var command = new GetAllBookMarkQuery(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+        [Authorize]
+        [HttpGet("PostDashboard")]
+        public async Task<ActionResult<PostDashboardDto>> PostDashboard()
+        {
+            var command = new PostDashboardQuery(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+        [Authorize]
+        [HttpPost("AddFeatured")]
+        public async Task<ActionResult<bool>> AddFeatured([FromBody] AddFeaturedRequest request)
+        {
+            var command = request.AddFeaturedCommand(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+        [AllowAnonymous]
+        [HttpGet("GetFeatured")]
+        public async Task<ActionResult<FeaturedPostDto>> GetFeatured()
+        {
+            var command = new GetFeaturedQuery();
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }

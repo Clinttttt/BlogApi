@@ -145,6 +145,28 @@ namespace BlogApi.Infrastructure.Migrations
                     b.ToTable("ExternalLogins");
                 });
 
+            modelBuilder.Entity("BlogApi.Domain.Entities.Featured", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId")
+                        .IsUnique();
+
+                    b.ToTable("Featureds");
+                });
+
             modelBuilder.Entity("BlogApi.Domain.Entities.NewsletterSubscriber", b =>
                 {
                     b.Property<int>("Id")
@@ -322,10 +344,19 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("Photo")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PhotoContentType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("UserInfos");
                 });
@@ -381,6 +412,17 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BlogApi.Domain.Entities.Featured", b =>
+                {
+                    b.HasOne("BlogApi.Domain.Entities.Post", "Post")
+                        .WithOne("Featured")
+                        .HasForeignKey("BlogApi.Domain.Entities.Featured", "PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("BlogApi.Domain.Entities.Post", b =>
                 {
                     b.HasOne("BlogApi.Domain.Entities.Category", "Category")
@@ -421,6 +463,17 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Navigation("tag");
                 });
 
+            modelBuilder.Entity("BlogApi.Domain.Entities.UserInfo", b =>
+                {
+                    b.HasOne("BlogApi.Domain.Entities.User", "User")
+                        .WithOne("UserInfo")
+                        .HasForeignKey("BlogApi.Domain.Entities.UserInfo", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BlogApi.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Posts");
@@ -437,6 +490,8 @@ namespace BlogApi.Infrastructure.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("Featured");
+
                     b.Navigation("PostLikes");
 
                     b.Navigation("PostTags");
@@ -450,6 +505,8 @@ namespace BlogApi.Infrastructure.Migrations
             modelBuilder.Entity("BlogApi.Domain.Entities.User", b =>
                 {
                     b.Navigation("ExternalLogins");
+
+                    b.Navigation("UserInfo");
                 });
 #pragma warning restore 612, 618
         }

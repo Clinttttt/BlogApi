@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Posts.AddComment
+namespace BlogApi.Application.Commands.Comment.AddComment
 {
     public class AddCommentCommandHandler : IRequestHandler<AddCommentCommand, Result<int>>
     {
@@ -23,7 +23,7 @@ namespace BlogApi.Application.Commands.Posts.AddComment
                   
            
             var post  = await _context.Posts.FindAsync(request.PostId, cancellationToken);
-            var comment = new Comment
+            var comment = new BlogApi.Domain.Entities.Comment
             {
                 UserId = request.UserId,
                 Content = request.Content,

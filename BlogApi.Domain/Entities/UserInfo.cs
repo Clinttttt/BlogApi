@@ -12,5 +12,8 @@ namespace BlogApi.Domain.Entities
         public Guid UserId { get; set; }
         public string? Bio { get; set; }
         public string? FullName { get; set; }
+        public byte[]? Photo { get; set; }
+        public string? PhotoContentType { get; set; }
+        public User? User { get; set; }
     }
 }

@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Queries.Posts.GetRecentPost
 {
-    public record GetRecentPostQuery(int Limit = 10) : IRequest<Result<List<PostDto>>>;
+    public record GetRecentPostQuery() : IRequest<Result<List<PostDto>>>;
    
 }

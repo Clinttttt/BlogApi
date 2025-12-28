@@ -17,12 +17,15 @@ namespace BlogApi.Application.Queries.User.GetCurrentUser
     {
         public async Task<Result<UserProfileDto>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
         {
-            var photo = await context.ExternalLogins
+            var photo = await context.Users
                  .AsNoTracking()
-                 .Where(s=> s.UserId == request.UserId)
+                 .Include(s=> s.UserInfo)
+                 .Where(s=> s.Id == request.UserId)
                  .Select(s => new UserProfileDto
                  {
-                     PhotoUrl = s.ProfilePhotoUrl
+                     PhotoUrl = s.UserInfo != null && s.UserInfo.Photo != null && s.UserInfo.Photo.Length > 0
+                    ? $"data:{s.UserInfo.PhotoContentType};base64,{Convert.ToBase64String(s.UserInfo.Photo)}"
+                    : s.ExternalLogins.Select(x => x.ProfilePhotoUrl).FirstOrDefault(),
 
                  }).FirstOrDefaultAsync();
             if (photo is null)

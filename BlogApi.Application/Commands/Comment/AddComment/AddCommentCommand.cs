@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Posts.AddComment
+namespace BlogApi.Application.Commands.Comment.AddComment
 {
     public record AddCommentCommand(int PostId, string Content, Guid UserId) : IRequest<Result<int>>;
     

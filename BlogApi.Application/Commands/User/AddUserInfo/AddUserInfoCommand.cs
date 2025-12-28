@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.User.AddUserInfo
 {
-    public record AddUserInfoCommand(string? Bio,string? FullName, Guid UserId) : IRequest<Result<bool>>;
+    public record AddUserInfoCommand(string? Bio, string? FullName, byte[]? Photo, string? PhotoContentType, Guid UserId) : IRequest<Result<bool>>;
    
 }

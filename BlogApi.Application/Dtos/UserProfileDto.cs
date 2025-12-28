@@ -8,6 +8,7 @@ namespace BlogApi.Application.Dtos
 {
     public class UserProfileDto
     {
-        public string? PhotoUrl { get; set; }
+       public string? PhotoUrl { get; set; }
     }
+   
 }

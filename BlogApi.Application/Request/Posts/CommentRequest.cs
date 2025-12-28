@@ -1,4 +1,5 @@
-﻿using BlogApi.Application.Commands.Posts.AddComment;
+﻿
+using BlogApi.Application.Commands.Comment.AddComment;
 using System;
 using System.Collections.Generic;
 using System.Linq;

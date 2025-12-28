@@ -26,7 +26,8 @@ namespace BlogApi.Domain.Entities
         public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
         public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
         public ICollection<BookMark> BookMarks { get; set; } = new List<BookMark>();
-       
+        public Featured? Featured { get; set; }
+
     }
 
 

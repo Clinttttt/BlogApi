@@ -1,24 +1,60 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-theme="clint" class="bg-red-500" >
-
+<html lang="en" data-theme="clint" class="bg-red-500">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <link rel="stylesheet" href="/css/site.min.css" asp-append-version="true" />
-    <!-- <link rel="stylesheet" href="app.css" />-->
     <link rel="stylesheet" href="BlogApi.Client.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
 </head>
-
 <body>
-    <Routes/>
+    <Routes />
     <component type="typeof(App)" render-mode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/TinyMCE.Blazor/tinymce-blazor.js"></script>
-    <script src="js/google-auth.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
-</body>
 
+    <!--  Loads synchronously -->
+    <script>
+        window.currentComponent = null;
+
+        window.initGoogleAuthWithButton = async (clientId, dotNetRef) => {
+            while (typeof google === 'undefined' || !google.accounts) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            window.currentComponent = dotNetRef;
+
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleGoogleResponse
+            });
+
+            const buttonDiv = document.getElementById('googleButtonDiv');
+            if (buttonDiv) {
+                google.accounts.id.renderButton(buttonDiv, {
+                    theme: 'outline',
+                    size: 'large',
+                    width: '100%',
+                    text: 'signin_with',
+                    shape: 'rectangular'
+                });
+            }
+        };
+
+        function handleGoogleResponse(response) {
+            if (window.currentComponent) {
+                window.currentComponent.invokeMethodAsync('HandleGoogleLoginCallback', response.credential);
+            }
+        }
+
+        window.triggerGoogleLogin = () => {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.prompt();
+            }
+        };
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
 </html>

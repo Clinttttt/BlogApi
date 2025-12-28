@@ -7,6 +7,7 @@ using BlogApi.Application.Request.Posts;
 using BlogApi.Client.Dtos;
 using BlogApi.Client.Interface;
 using BlogApi.Domain.Common;
+using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Identity.Client;
 
@@ -23,15 +24,21 @@ namespace BlogApi.Client.Services
         {
             var request = await _httpClient.PostAsJsonAsync("api/Posts/CreatePosts", dto);
             request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<int>();         
+            var result = await request.Content.ReadFromJsonAsync<int>();
             return Result<int>.Success(result);
         }
         public async Task<Result<PostWithCommentsDto>> Get(GetPostWithCommentsRequest PostId)
-        {       
-            var request = await _httpClient.GetFromJsonAsync<PostWithCommentsDto>($"api/Posts/GetPost?PostId={PostId.PostId}");
-            if (request is null) return Result<PostWithCommentsDto>.NotFound();
+        {
+            var response = await _httpClient.GetAsync($"api/Posts/GetPost?PostId={PostId.PostId}");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<PostWithCommentsDto>.NotFound();
+            var request = await response.Content.ReadFromJsonAsync<PostWithCommentsDto>();
+            if (request is null)
+                return Result<PostWithCommentsDto>.NotFound();
             return Result<PostWithCommentsDto>.Success(request);
         }
+
         public async Task<Result<int>> Update(UpdatePostRequest dto)
         {
             var request = await _httpClient.PatchAsJsonAsync("api/Posts/UpdatePost", dto);
@@ -56,32 +63,41 @@ namespace BlogApi.Client.Services
         }
         public async Task<Result<List<PostDto>>> GetPostPage(GetPostPagedQuery request)
         {
+            var response = await _httpClient.GetAsync($"api/Posts/GetAllPost?=PageNumber{request.PageNumber}&PageSize={request.PageSize}");
 
-            var result = await _httpClient.GetFromJsonAsync<List<PostDto>>($"api/Posts/GetAllPost?=PageNumber{request.PageNumber}&PageSize={request.PageSize}");
-            if (result is null) return Result<List<PostDto>>.NotFound();
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<List<PostDto>>.NotFound();
+            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
+            if (result is null)
+                return Result<List<PostDto>>.NotFound();
             return Result<List<PostDto>>.Success(result);
         }
+
         public async Task<Result<bool>> PostLike(int Id)
         {
             var request = await _httpClient.PostAsync($"api/Posts/PostLike?PostId={Id}", null);
             request.EnsureSuccessStatusCode();
             var result = await request.Content.ReadFromJsonAsync<bool>();
             return Result<bool>.Success(result);
-        }   
+        }
         public async Task<Result<List<PostDto>>> GetPostByTag(int Id)
         {
-            var request = await _httpClient.PostAsync($"api/Posts/GetPostByTag?TagId={Id}",null);
+            var request = await _httpClient.PostAsync($"api/Posts/GetPostByTag?TagId={Id}", null);
             request.EnsureSuccessStatusCode();
             var result = await request.Content.ReadFromJsonAsync<List<PostDto>>();
             if (result is null) return Result<List<PostDto>>.NotFound();
             return Result<List<PostDto>>.Success(result);
         }
-        public async Task<Result<List<PostDto>>> GetRecentPost(int Id)
+        public async Task<Result<List<PostDto>>> GetRecentPost()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<PostDto>>($"api/Posts/GetRecentPost?RecentPost={Id}");
-            if (result is null) return Result<List<PostDto>>.NotFound();
-            return Result<List<PostDto>>.Success(result);
+            var response = await _httpClient.GetAsync("api/Posts/GetRecentPost");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<List<PostDto>>.NoContent();
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
+            return Result<List<PostDto>>.Success(result!);
         }
+
         public async Task<Result<int>> CreateComment(CommentRequest dto)
         {
             var request = await _httpClient.PostAsJsonAsync("api/Posts/CreateComment", dto);
@@ -112,10 +128,41 @@ namespace BlogApi.Client.Services
         }
         public async Task<Result<List<PostDto>>> GetBookMark()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<PostDto>>("api/Posts/GetBookMark");
-            if (result is null) return Result<List<PostDto>>.NotFound();
-            return Result<List<PostDto>>.Success(result);
+            var response = await _httpClient.GetAsync("api/Posts/GetBookMark");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<List<PostDto>>.NoContent();
+            response.EnsureSuccessStatusCode(); 
+            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
+            return Result<List<PostDto>>.Success(result!);
         }
+
+        public async Task<Result<PostDashboardDto>?> PostDashboard()
+        {
+            var response = await _httpClient.GetAsync("api/Posts/PostDashboard");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<PostDashboardDto>.NoContent();
+            response.EnsureSuccessStatusCode(); 
+            var result = await response.Content.ReadFromJsonAsync<PostDashboardDto>();
+            return Result<PostDashboardDto>.Success(result!);
+        }
+        public async Task<Result<bool>> AddFeatured(AddFeaturedRequest dto)
+        {
+            var request = await _httpClient.PostAsJsonAsync("api/Posts/AddFeatured", dto);
+            request.EnsureSuccessStatusCode();
+            var result = await request.Content.ReadFromJsonAsync<bool>();
+            return Result<bool>.Success(result);
+        }
+        public async Task<Result<FeaturedPostDto>> GetFeatured()
+        {
+            var response = await _httpClient.GetAsync("api/Posts/GetFeatured");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return Result<FeaturedPostDto>.NoContent();
+            var result = await response.Content.ReadFromJsonAsync<FeaturedPostDto>();
+            if (result is null)
+                return Result<FeaturedPostDto>.NoContent();
+            return Result<FeaturedPostDto>.Success(result);
+        }
+
 
     }
 }

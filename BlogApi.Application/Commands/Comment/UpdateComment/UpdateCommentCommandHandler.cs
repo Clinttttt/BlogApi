@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Posts.UpdateComment
+namespace BlogApi.Application.Commands.Comment.UpdateComment
 {
     public class UpdateCommentCommandHandler : IRequestHandler<UpdateCommentCommand, Result<int>>
     {
@@ -26,7 +26,7 @@ namespace BlogApi.Application.Commands.Posts.UpdateComment
             if (comment is null)
                 return Result<int>.NotFound();
 
-            var update = new Comment
+            var update = new BlogApi.Domain.Entities.Comment
             {       
                 Content = request.Content
             };

@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApi.Application.Commands.Posts.UpdateComment
+namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
 {
-    public record UpdateCommentCommand(int Id, string? Content,Guid UserId) : IRequest<Result<int>>;
+    public record AddFeaturedCommand(int PostId, Guid UserId) : IRequest<Result<bool>>;
    
 }

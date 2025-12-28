@@ -21,26 +21,26 @@ namespace BlogApi.Application.Queries.Posts.GetPostWithComments
         }
         public async Task<Result<PostWithCommentsDto>> Handle(GetPostWithCommentsQuery request, CancellationToken cancellationToken)
         {
-          
-         
             var postwithcomment = await _context.Posts
-                .Include(s=> s.Category)
-                .Include(s=> s.PostLikes)
-                .Include(s=> s.Comments)
-                .ThenInclude(s=> s.CommentLikes)
-                .Include(s=> s.PostTags)         
-                .ThenInclude(s=> s.tag)
-                .Include(s=> s.Comments)
-                .ThenInclude(s=> s.User.ExternalLogins)
+                .Include(s => s.Category)
+                .Include(s => s.PostLikes)
+                .Include(s => s.Comments)
+                .ThenInclude(s => s.CommentLikes)
+                .Include(s => s.PostTags)
+                .ThenInclude(s => s.tag)
+                .Include(s => s.Comments)
+                .ThenInclude(s => s.User.UserInfo)
+                 .Include(s => s.Comments)
+                .ThenInclude(s => s.User.ExternalLogins)
                  .AsNoTracking()
                  .Where(s => s.Id == request.PostId)
                  .Select(s => new PostWithCommentsDto
                  {
-                     IsBookMark = s.BookMarks.Any(s=> s.UserId == request.UserId),
+                     IsBookMark = s.BookMarks.Any(s => s.UserId == request.UserId),
                      PostLike = s.PostLikes.Count(),
                      Title = s.Title,
                      Content = s.Content,
-                     PhotoIsliked = s.PostLikes.Where(s=> s.UserId == request.UserId).Any(),
+                     PhotoIsliked = s.PostLikes.Where(s => s.UserId == request.UserId).Any(),
                      CommentCount = s.Comments.Count(),
                      PostCreatedAt = s.CreatedAt,
                      CategoryName = s.Category.Name,
@@ -56,18 +56,17 @@ namespace BlogApi.Application.Queries.Posts.GetPostWithComments
                      }).ToList(),
                      Comments = s.Comments
                      .Select(c => new CommentDto
-                     {                 
+                     {
                          IsLikedComment = c.CommentLikes.Any(cl => cl.UserId == request.UserId),
                          LikeCount = c.CommentLikes.Count(),
                          CommentId = c.Id,
                          PostId = c.PostId,
                          Content = c.Content,
                          CreatedAt = c.CreatedAt,
-                         UserName  = c.User.UserName,                       
-                         PhotoUrl  = c.User.ExternalLogins.OrderByDescending
-                         (s=> s.LinkedAt)
-                         .Select(s=> s.ProfilePhotoUrl)
-                         .FirstOrDefault()
+                         UserName = c.User.UserName,
+                         PhotoUrl = c.User.UserInfo != null && c.User.UserInfo.Photo != null && c.User.UserInfo.Photo.Length > 0
+                    ? $"data:{c.User.UserInfo.PhotoContentType};base64,{Convert.ToBase64String(c.User.UserInfo.Photo)}"
+                    : c.User.ExternalLogins.Select(x => x.ProfilePhotoUrl).FirstOrDefault(),
 
                      }).ToList()
                  }).FirstOrDefaultAsync(cancellationToken);

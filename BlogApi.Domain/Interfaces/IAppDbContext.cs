@@ -22,6 +22,7 @@ namespace BlogApi.Domain.Interfaces
         DbSet<ExternalLogin> ExternalLogins { get; set; }
         DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
         DbSet<UserInfo> UserInfos { get; set; }
+        DbSet<Featured> Featureds { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

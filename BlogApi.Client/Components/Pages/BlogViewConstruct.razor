@@ -1,9 +1,5 @@
 ﻿@page "/viewblogconstruct/{PostId:int}"
-@using BlogApi.Application.Dtos
-@using BlogApi.Application.Request.Posts
-@using BlogApi.Client.Interface
-@using BlogApi.Domain.Common
-@using BlogApi.Domain.Helper
+
 @rendermode InteractiveServer
 @inject IPostClientService PostClient
 
@@ -154,8 +150,8 @@
                     {
                         <div class="flex gap-4">
                             <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center  ">
-                                    <img src="@comment.PhotoUrl" alt="User photo" />
+                                <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+                                    <img src="@comment.PhotoUrl" alt="User photo" class="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <div class="flex-1">

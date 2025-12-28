@@ -4,6 +4,7 @@ using BlogApi.Application.Commands.Newsletter.SubscribeToNewsletter;
 using BlogApi.Application.Commands.Newsletter.UnSubscribeToNewsletter;
 using BlogApi.Application.Common.Interfaces;
 using BlogApi.Application.Dtos;
+using BlogApi.Application.Queries.Posts.GetUserInfo;
 using BlogApi.Application.Queries.User.CurrentUser;
 using BlogApi.Application.Request.Newsletter;
 using BlogApi.Application.Request.User;
@@ -36,7 +37,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
         [Authorize]
-        [HttpPost("UpdateUserInfo")]
+        [HttpPatch("UpdateUserInfo")]
         public async Task<ActionResult<bool>> UpdateUserInfo(UserInfoRequest request)
         {
             var command = request.UpdateUserInfoCommand(UserId);
@@ -51,6 +52,15 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+        [Authorize]
+        [HttpGet("GetUserInfoDto")]
+        public async Task<ActionResult<UserInfoDto>> GetUserInfoDto()
+        {
+            var command = new GetUserInfoQuery(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+
         [AllowAnonymous]
         [HttpPost("SubscribeToNewsletter")]
         public async Task<ActionResult<bool>> SubscribeToNewsletter(SubscribeToNewsletterCommand command)

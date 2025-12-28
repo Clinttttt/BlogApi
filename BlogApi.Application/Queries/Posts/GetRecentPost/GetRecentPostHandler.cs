@@ -22,11 +22,11 @@ namespace BlogApi.Application.Queries.Posts.GetRecentPost
                 .AsNoTracking()
                 .Where(s=> s.Status == EntityEnum.Status.Published)
                 .OrderByDescending(s=> s.CreatedAt)
-                .Take(request.Limit)
+                .Take(3)
                 .ToListAsync();
 
             if (!query.Any())
-                return Result<List<PostDto>>.NotFound();
+                return Result<List<PostDto>>.NoContent();
             var querydto = mapper.Map<List<PostDto>>(query);
             return Result<List<PostDto>>.Success(querydto);
         }

@@ -1,4 +1,4 @@
-﻿using BlogApi.Application.Commands.Posts.UpdateComment;
+﻿using BlogApi.Application.Commands.Comment.UpdateComment;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿using BlogApi.Application.Commands.Posts.UpdateComment;
+﻿
 using BlogApi.Application.Commands.User.AddUserInfo;
 using BlogApi.Application.Commands.User.UpdateUserInfo;
 using System;
@@ -13,9 +13,11 @@ namespace BlogApi.Application.Request.User
     {
         public string? Bio { get; set; }
         public string? FullName { get; set; }
+        public byte[]? Photo { get; set; }
+        public string? PhotoContentType { get; set; }
         public AddUserInfoCommand AddUserInfoCommand(Guid UserId)
-            => new(Bio, FullName, UserId);
+            => new(Bio, FullName, Photo, PhotoContentType, UserId);
         public UpdateUserInfoCommand UpdateUserInfoCommand(Guid UserId)
-           => new(Bio, FullName, UserId);
+           => new(Bio, FullName, Photo, PhotoContentType,UserId);
     }
 }

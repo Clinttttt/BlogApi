@@ -20,7 +20,9 @@ namespace BlogApi.Application.Commands.User.AddUserInfo
                 {
                     Bio = request.Bio,
                     FullName = request.FullName,
-                    UserId = request.UserId
+                    UserId = request.UserId,
+                    Photo = request.Photo,
+                    PhotoContentType = request.PhotoContentType,
                 });
             else
                 return Result<bool>.Conflict();

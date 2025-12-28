@@ -16,5 +16,6 @@ namespace BlogApi.Domain.Entities
         public DateTime RefreshTokenExpiryTime { get; set; }
         public string? Email { get; set; }
         public List<ExternalLogin> ExternalLogins { get; set; } = new();
+        public UserInfo? UserInfo { get; set; }
     }
 }

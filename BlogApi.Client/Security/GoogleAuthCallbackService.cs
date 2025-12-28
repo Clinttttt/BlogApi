@@ -43,8 +43,9 @@ namespace BlogApi.Client.Services
                     await _js.InvokeVoidAsync("localStorage.setItem", "AccessToken", result.Value.AccessToken!);
                     await _js.InvokeVoidAsync("localStorage.setItem", "RefreshToken", result.Value.RefreshToken!);
                    
-                     _authStateProvider.MarkUserAsAuthenticated();              
+                     _authStateProvider.MarkUserAsAuthenticated();             
                     _navigation.NavigateTo("/");
+                    
                 }
                 else
                 {
