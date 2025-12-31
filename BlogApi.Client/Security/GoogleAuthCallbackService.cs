@@ -1,6 +1,7 @@
 ﻿using BlogApi.Client.Interface;
 using BlogApi.Client.Security;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
@@ -11,6 +12,7 @@ namespace BlogApi.Client.Services
         private readonly IAuthClientService _authService;
         private readonly NavigationManager _navigation;
         private readonly AuthStateProvider _authStateProvider;
+        private readonly ProtectedLocalStorage _localStorage;
         private readonly IJSRuntime _js;
         private readonly ILogger<GoogleAuthCallbackService> _logger;
 
@@ -18,6 +20,7 @@ namespace BlogApi.Client.Services
             IAuthClientService authService,
             NavigationManager navigation,
             AuthStateProvider authStateProvider,
+            ProtectedLocalStorage localStorage,
             IJSRuntime js,
             ILogger<GoogleAuthCallbackService> logger)
         {
@@ -25,6 +28,7 @@ namespace BlogApi.Client.Services
             _navigation = navigation;
             _authStateProvider = authStateProvider;
             _js = js;
+            _localStorage = localStorage;
             _logger = logger;
         }
 
@@ -39,12 +43,12 @@ namespace BlogApi.Client.Services
                 
                     AuthorizationDelegatingHandler.CacheToken(result.Value.AccessToken!);
 
-             
-                    await _js.InvokeVoidAsync("localStorage.setItem", "AccessToken", result.Value.AccessToken!);
-                    await _js.InvokeVoidAsync("localStorage.setItem", "RefreshToken", result.Value.RefreshToken!);
-                   
-                     _authStateProvider.MarkUserAsAuthenticated();             
-                    _navigation.NavigateTo("/");
+
+                    await _localStorage.SetAsync("AccessToken", result.Value.AccessToken!);
+                    await _localStorage.SetAsync("RefreshToken", result.Value.RefreshToken!);
+
+                    _authStateProvider.MarkUserAsAuthenticated();             
+                    _navigation.NavigateTo("/", forceLoad: true);
                     
                 }
                 else

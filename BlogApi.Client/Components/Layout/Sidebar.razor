@@ -1,6 +1,7 @@
-﻿@using BlogApi.Client.Services
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @inject GoogleAuthCallbackService GoogleCallback
+@inject ICategoryClientService  CategoryClient
+@inject ITagClientService TagClient
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -14,53 +15,36 @@
                 <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 font-semibold cursor-pointer">
                     <span class="text-xl">💻</span>
                     <span>All Posts</span>
-                    <span class="ml-auto bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">24</span>
+                    <span class="ml-auto bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">@categories?.FirstOrDefault()?.AllPost</span>
                 </li>
-                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <span class="text-xl text-indigo-500">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
-                        </svg>
-                    </span>
-                    <span>Blazor</span>
-                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">8</span>
-                </li>
-                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <span class="text-xl text-indigo-500">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
-                        </svg>
-                    </span>
-                    <span>.NET Core</span>
-                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">12</span>
-                </li>
-                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <span class="text-xl text-indigo-500">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
-                        </svg>
-                    </span>
-                    <span>CQRS</span>
-                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">5</span>
-                </li>
-                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <span class="text-xl text-indigo-500">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
-                        </svg>
-                    </span>
-                    <span>Authentication</span>
-                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">6</span>
-                </li>
-                <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                    <span class="text-xl text-indigo-500">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
-                        </svg>
-                    </span>
-                    <span>Web API</span>
-                    <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">9</span>
-                </li>
+                @if (categories?.Any() == true && categories is not null)
+                {
+                    foreach (var category in categories)
+                    {
+                        <NavLink href="@($"category/{category.Id}")" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                            <span class="text-xl text-indigo-500">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                                </svg>
+                            </span>
+                            <span>@category.Name</span>
+                            <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">@category.CategoryCount</span>
+                        </NavLink>
+                    }
+                }
+                else
+                {
+                    <li class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                        <span class="text-xl text-indigo-500">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4" />
+                            </svg>
+                        </span>
+                        <span>No post yet</span>
+                        <span class="ml-auto bg-gray-200 px-2 py-0.5 rounded-full text-xs font-semibold">0</span>
+                    </li>
+                }
+
             </ul>
         </div>
 
@@ -83,24 +67,20 @@
         <div class="mb-6">
             <h3 class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4">Popular Tags</h3>
             <div class="flex flex-wrap gap-2">
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    blazor-server
-                </span>
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    mediatr
-                </span>
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    cqrs
-                </span>
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    authentication
-                </span>
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    google-login
-                </span>
-                <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
-                    clean-architecture
-                </span>
+                @if (tags?.Any() == true && tags is not null)
+                {
+                foreach (var tag in tags)
+                    {
+                        <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                           @tag.Name
+                        </span>
+                    }
+                }
+                else
+                {
+                    <h1>No tags yet</h1>
+                }
+
             </div>
         </div>
 
@@ -122,13 +102,21 @@
     private const string GoogleClientId = "981649586366-fv3d4al1foo7u24bigmuhhhu98uq2fd1.apps.googleusercontent.com";
     private DotNetObjectReference<Sidebar>? _objRef;
 
+    private List<CategoryDto>? categories { get; set; } = new List<CategoryDto>();
+    private List<TagDto>? tags { get; set; } = new List<TagDto>();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             _objRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("initGoogleAuth", GoogleClientId, _objRef);
+            var category = await CategoryClient.GetListing();
+            var tag = await TagClient.GetAllTags();
+            tags = tag.Value;
+            categories = category.Value;
         }
+        StateHasChanged();
     }
 
     private async Task SignInWithGoogle()

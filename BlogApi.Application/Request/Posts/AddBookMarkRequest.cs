@@ -10,7 +10,8 @@ namespace BlogApi.Application.Request.Posts
     public class AddBookMarkRequest
     {
         public int? PostId { get; set; }
-        public AddBookMarkCommand AddBookMarkCommand(Guid UserId)
-            => new(PostId, UserId);
+
+        public AddBookMarkCommand ToCommand(Guid userId)
+            => new(PostId, userId);
     }
 }

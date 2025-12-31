@@ -2,6 +2,7 @@
 using BlogApi.Application.Common.Interfaces;
 using BlogApi.Domain.Interfaces;
 using BlogApi.Infrastructure.Persistence;
+using BlogApi.Infrastructure.Respository;
 using BlogApi.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,9 @@ namespace BlogApi.Infrastructure
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, SendGridEmailService>();
+            services.AddScoped<IPostRespository, PostRespository>();
+            services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+            services.AddScoped<IUserRespository, UserRespository>();
             return services;
         }
     }

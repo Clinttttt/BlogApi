@@ -26,11 +26,11 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("GetCategory")]
         public async Task<ActionResult<List<CategoryDto>>> GetListing()
         {
-            var query = new GetAllCategoryQuery(UserId);
+            var query = new GetListQuery();
             var result = await Sender.Send(query);
             return HandleResponse(result);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,11 +23,12 @@ namespace BlogApi.Domain.Entities
         public ReadingDuration readingDuration { get; set; }
         public int? CategoryId { get; set; }
         public Category Category { get; set; } = null!;
+        public User User { get; set; } = null!;
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
         public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
         public ICollection<BookMark> BookMarks { get; set; } = new List<BookMark>();
-        public Featured? Featured { get; set; }
+        public ICollection<Featured> Featured { get; set; } = new List<Featured>();
 
     }
 

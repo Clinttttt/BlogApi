@@ -10,8 +10,8 @@ namespace BlogApi.Application.Request.Posts
     public class ToggleCommentLikeRequest
     {
         public int CommentId { get; set; }
-     
-        public ToggleCommentLikeCommand ToggleCommentLikeCommand(Guid UserId)
-            => new(CommentId, UserId);
+
+        public ToggleCommentLikeCommand ToCommand(Guid userId)
+            => new(CommentId, userId);
     }
 }

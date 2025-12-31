@@ -318,7 +318,7 @@
     private string errorMessage = string.Empty;
     public DateTime PublishedDate { get; set; }
 
-    public PostRequest Post { get; set; } = new PostRequest
+    public CreatePostRequest Post { get; set; } = new CreatePostRequest
     {
         Status = EntityEnum.Status.Draft,
         ReadingDuration = ReadingDuration.Minutes5

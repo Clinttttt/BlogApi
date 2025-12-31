@@ -9,7 +9,7 @@ namespace BlogApi.Application.Request.Category
 {
     public class GetAllCategoryRequest
     {
-        public GetAllCategoryQuery GetAllCategoryQuery(Guid UserId)
-            => new(UserId);
+        public GetListQuery GetAllCategoryQuery()
+            => new();
     }
 }

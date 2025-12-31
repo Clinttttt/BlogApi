@@ -18,8 +18,7 @@ namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
             var featured = await context.Featureds.FirstOrDefaultAsync(s => s.PostId == request.PostId);
             if (featured is not null)
             {
-                featured.PostId = request.PostId;
-                context.Featureds.Update(featured);
+                return Result<bool>.Conflict();
             }
             else
             {

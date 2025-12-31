@@ -77,7 +77,7 @@ namespace BlogApi.Infrastructure.Services
                         UserName = GoogleUser.Value!.Email.Split('@')[0],
                         Email = GoogleUser.Value.Email,
                         PasswordHash = null!,
-                        Role = "User"
+                        Role = "Author"
                     };
                     context.Users.Add(user);
                     await context.SaveChangesAsync();

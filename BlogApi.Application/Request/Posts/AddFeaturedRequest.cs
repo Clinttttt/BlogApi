@@ -11,7 +11,7 @@ namespace BlogApi.Application.Request.Posts
     {
         public int PostId { get; set; }
 
-        public AddFeaturedCommand AddFeaturedCommand(Guid UserId)
-            => new(PostId, UserId); 
+        public AddFeaturedCommand ToCommand(Guid userId)
+            => new(PostId, userId);
     }
 }

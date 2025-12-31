@@ -34,11 +34,11 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("GetAllTags")]
         public async Task<ActionResult<List<TagDto>>> GetAllTags()
         {
-            var command = new GetAllTagsQuery(UserId);
+            var command = new GetListQuery();
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }

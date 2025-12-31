@@ -10,19 +10,15 @@ namespace BlogApi.Application.Request.Posts
 {
     public class UpdatePostRequest
     {
-        public int Id { get; set; }
+        public int PostId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public byte[]? Photo { get; set; }
         public string? PhotoContent { get; set; }
         public string? Author { get; set; }
-        public ReadingDuration readingDuration { get; set; }
+        public ReadingDuration ReadingDuration { get; set; }
 
-
-
-        public UpdatePostCommand UpdateCommand(Guid UserId)
-            => new(Id, Title, Content, Photo, PhotoContent, Author, readingDuration, UserId);
+        public UpdatePostCommand ToCommand(Guid userId)
+            => new(PostId, Title, Content, Photo, PhotoContent, Author, ReadingDuration, userId);
     }
-
-
 }

@@ -1,210 +1,77 @@
-﻿/*using BlogApi.Application.Commands.Posts.CreatePost;
-using BlogApi.Application.Dtos;
-
-using BlogApi.Application.Queries.Posts.GetPostPaged;
-using BlogApi.Application.Queries.Posts.GetPostWithComments;
+﻿using BlogApi.Application.Dtos;
+using BlogApi.Application.Models;
 using BlogApi.Application.Request.Posts;
-using BlogApi.Client.Dtos;
 using BlogApi.Client.Helper;
 using BlogApi.Client.Interface;
 using BlogApi.Domain.Common;
-using Microsoft.AspNetCore.Server.HttpSys;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Identity.Client;
-
-namespace BlogApi.Client.Services
-{
-    public class PostClientService : IPostClientService
-    {
-        private readonly HttpClient _httpClient;
-        public PostClientService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-        public async Task<Result<int>> Create(PostRequest dto)
-        {
-            var request = await _httpClient.PostAsJsonAsync("api/Posts/CreatePosts", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<int>();
-            return Result<int>.Success(result);
-        }
-        public async Task<Result<PostWithCommentsDto>> Get(GetPostWithCommentsRequest PostId)
-        {
-            var response = await _httpClient.GetAsync($"api/Posts/GetPost?PostId={PostId.PostId}");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<PostWithCommentsDto>.NotFound();
-            var request = await response.Content.ReadFromJsonAsync<PostWithCommentsDto>();
-            if (request is null)
-                return Result<PostWithCommentsDto>.NotFound();
-            return Result<PostWithCommentsDto>.Success(request);
-        }
-
-        public async Task<Result<int>> Update(UpdatePostRequest dto)
-        {
-            var request = await _httpClient.PatchAsJsonAsync("api/Posts/UpdatePost", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<int>();
-            return Result<int>.Success(result);
-        }
-        public async Task<Result<bool>> Archived(int Id)
-        {
-            var request = await _httpClient.PatchAsync($"api/Posts/ArchivedPost?Id={Id}", null);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-
-        }
-        public async Task<Result<bool>> Delete(int Id)
-        {
-            var request = await _httpClient.DeleteAsync($"api/Posts/DeletePost?PostId={Id}");
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-        }
-        public async Task<Result<List<PostDto>>> GetPostPage(GetPostPagedQuery request)
-        {
-            var response = await _httpClient.GetAsync($"api/Posts/GetAllPost?=PageNumber{request.PageNumber}&PageSize={request.PageSize}");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<List<PostDto>>.NotFound();
-            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
-            if (result is null)
-                return Result<List<PostDto>>.NotFound();
-            return Result<List<PostDto>>.Success(result);
-        }
-
-        public async Task<Result<bool>> PostLike(int Id)
-        {
-            var request = await _httpClient.PostAsync($"api/Posts/PostLike?PostId={Id}", null);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-        }
-        public async Task<Result<List<PostDto>>> GetPostByTag(int Id)
-        {
-            var request = await _httpClient.PostAsync($"api/Posts/GetPostByTag?TagId={Id}", null);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<List<PostDto>>();
-            if (result is null) return Result<List<PostDto>>.NotFound();
-            return Result<List<PostDto>>.Success(result);
-        }
-        public async Task<Result<List<PostDto>>> GetRecentPost()
-        {
-            var response = await _httpClient.GetAsync("api/Posts/GetRecentPost");
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<List<PostDto>>.NoContent();
-            response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
-            return Result<List<PostDto>>.Success(result!);
-        }
-
-        public async Task<Result<int>> CreateComment(CommentRequest dto)
-        {
-            var request = await _httpClient.PostAsJsonAsync("api/Posts/CreateComment", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<int>();
-            return Result<int>.Success(result);
-        }
-        public async Task<Result<int>> UpdateComment(UpdateCommentRequest dto)
-        {
-            var request = await _httpClient.PatchAsJsonAsync("api/Posts/UpdateComment", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<int>();
-            return Result<int>.Success(result);
-        }
-        public async Task<Result<bool>> CommentLike(ToggleCommentLikeRequest dto)
-        {
-            var request = await _httpClient.PostAsJsonAsync("api/Posts/CommentLike", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-        }
-        public async Task<Result<bool>> AddBookMark(AddBookMarkRequest dto)
-        {
-            var request = await _httpClient.PostAsJsonAsync("api/Posts/AddBookMark", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-        }
-        public async Task<Result<List<PostDto>>> GetBookMark()
-        {
-            var response = await _httpClient.GetAsync("api/Posts/GetBookMark");
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<List<PostDto>>.NoContent();
-            response.EnsureSuccessStatusCode(); 
-            var result = await response.Content.ReadFromJsonAsync<List<PostDto>>();
-            return Result<List<PostDto>>.Success(result!);
-        }
-
-        public async Task<Result<PostDashboardDto>?> PostDashboard()
-        {
-            var response = await _httpClient.GetAsync("api/Posts/PostDashboard");
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<PostDashboardDto>.NoContent();
-            response.EnsureSuccessStatusCode(); 
-            var result = await response.Content.ReadFromJsonAsync<PostDashboardDto>();
-            return Result<PostDashboardDto>.Success(result!);
-        }
-        public async Task<Result<bool>> AddFeatured(AddFeaturedRequest dto)
-        {
-            var request = await _httpClient.PostAsJsonAsync("api/Posts/AddFeatured", dto);
-            request.EnsureSuccessStatusCode();
-            var result = await request.Content.ReadFromJsonAsync<bool>();
-            return Result<bool>.Success(result);
-        }
-        public async Task<Result<FeaturedPostDto>> GetFeatured()
-        {
-            var response = await _httpClient.GetAsync("api/Posts/GetFeatured");
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return Result<FeaturedPostDto>.NoContent();
-            var result = await response.Content.ReadFromJsonAsync<FeaturedPostDto>();
-            if (result is null)
-                return Result<FeaturedPostDto>.NoContent();
-            return Result<FeaturedPostDto>.Success(result);
-        }
-
-
-    }
-}
-*/
-
-
-using BlogApi.Application.Commands.Posts.CreatePost;
-using BlogApi.Application.Dtos;
-
-using BlogApi.Application.Queries.Posts.GetPostPaged;
-using BlogApi.Application.Queries.Posts.GetPostWithComments;
-using BlogApi.Application.Request.Posts;
-using BlogApi.Client.Dtos;
-using BlogApi.Client.Helper;
-using BlogApi.Client.Interface;
-using BlogApi.Domain.Common;
-using Microsoft.AspNetCore.Server.HttpSys;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Identity.Client;
-using System.Net.Http;
 
 namespace BlogApi.Client.Services
 {
     public class PostClientService(HttpClient httpClient) : HandleResponse(httpClient), IPostClientService
     {
-        public async Task<Result<int>> Create(PostRequest dto) => await PostAsync<PostRequest, int>("api/Posts/CreatePosts", dto);
-        public async Task<Result<PostWithCommentsDto>> Get(GetPostWithCommentsRequest PostId) => await GetAsync<PostWithCommentsDto>($"api/Posts/GetPost?PostId={PostId.PostId}");
-        public async Task<Result<int>> Update(UpdatePostRequest dto) => await UpdateAsync<UpdatePostRequest, int>("api/Posts/UpdatePost", dto);
-        public async Task<Result<bool>> Archived(int Id) => await UpdateAsync<bool>($"api/Posts/ArchivedPost?Id={Id}");
-        public async Task<Result<bool>> Delete(int Id) => await DeleteAsync<bool>($"api/Posts/DeletePost?PostId={Id}");
-        public async Task<Result<List<PostDto>>> GetPostPage(GetPostPagedQuery request) => await GetAsync<List<PostDto>>($"api/Posts/GetAllPost?=PageNumber{request.PageNumber}&PageSize={request.PageSize}");
-        public async Task<Result<List<PostDto>>> GetPostByTag(int Id) => await GetAsync<List<PostDto>>($"api/Posts/GetPostByTag?TagId={Id}");
-        public async Task<Result<List<PostDto>>> GetRecentPost() => await GetAsync<List<PostDto>>("api/Posts/GetRecentPost");
-        public async Task<Result<int>> CreateComment(CommentRequest dto) => await PostAsync<CommentRequest, int>("api/Posts/CreateComment", dto);
-        public async Task<Result<bool>> PostLike(int Id) => await PostAsync<bool>($"api/Posts/PostLike?PostId={Id}");
-        public async Task<Result<bool>> UpdateComment(UpdateCommentRequest dto) => await UpdateAsync<UpdateCommentRequest, bool>("api/Posts/UpdateComment", dto);
-        public async Task<Result<bool>> CommentLike(ToggleCommentLikeRequest dto) => await PostAsync<ToggleCommentLikeRequest, bool>("api/Posts/CommentLike", dto);
-        public async Task<Result<bool>> AddBookMark(AddBookMarkRequest dto) => await PostAsync<AddBookMarkRequest, bool>("api/Posts/AddBookMark", dto);
-        public async Task<Result<List<PostDto>>> GetBookMark() => await GetAsync<List<PostDto>>("api/Posts/GetBookMark");
-        public async Task<Result<PostDashboardDto>> PostDashboard() => await GetAsync<PostDashboardDto>("api/Posts/PostDashboard");
-        public async Task<Result<bool>> AddFeatured(AddFeaturedRequest dto) => await PostAsync<AddFeaturedRequest, bool>("api/Posts/AddFeatured", dto);
-        public async Task<Result<FeaturedPostDto>> GetFeatured() => await GetAsync<FeaturedPostDto>("api/Posts/GetFeatured");
+      
+
+        public async Task<Result<int>> Create(CreatePostRequest dto)
+            => await PostAsync<CreatePostRequest, int>("api/Posts/AddPost", dto);
+
+        public async Task<Result<PostDetailDto>> Get(GetPostRequest request)
+            => await GetAsync<PostDetailDto>($"api/Posts/GetPost?PostId={request.PostId}");
+
+        public async Task<Result<int>> Update(UpdatePostRequest dto)
+            => await UpdateAsync<UpdatePostRequest, int>("api/Posts/UpdatePost", dto);
+
+        public async Task<Result<bool>> Archive(ArchivePostRequest request)
+            => await UpdateAsync<bool>($"api/Posts/ArchivedPost?PostId={request.PostId}");
+
+        public async Task<Result<bool>> Delete(DeletePostRequest request)
+            => await DeleteAsync<bool>($"api/Posts/DeletePost?PostId={request.PostId}");
+
+
+
+        public async Task<Result<PagedResult<PostDto>>> ListForAdmin(ListForAdminPostsRequest request)
+           => await GetAsync<PagedResult<PostDto>>($"api/Posts/ListForAdmin?PageNumber={request.PageNumber}&PageSize={request.PageSize}");
+
+        public async Task<Result<PagedResult<PostDto>>> ListPublished(ListPublishedPostsRequest request)
+            => await GetAsync<PagedResult<PostDto>>($"api/Posts/ListPublished?PageNumber={request.PageNumber}&PageSize={request.PageSize}");
+
+        public async Task<Result<List<PostDto>>> ListByTag(int id)
+            => await GetAsync<List<PostDto>>($"api/Posts/ListByTag/{id}");
+
+        public async Task<Result<List<PostDto>>> ListByCategory(int id)
+            => await GetAsync<List<PostDto>>($"api/Posts/ListByCategory/{id}");
+
+        
+        public async Task<Result<bool>> ToggleLikePost(TogglePostLikeRequest request)
+            => await PostAsync<bool>($"api/Posts/ToggleLikePost?PostId={request.PostId}");
+
+        public async Task<Result<bool>> AddBookMark(AddBookMarkRequest request)
+            => await PostAsync<bool>($"api/Posts/AddBookMark?PostId={request.PostId}");
+
+        public async Task<Result<List<PostDto>>> ListBookMark()
+            => await GetAsync<List<PostDto>>("api/Posts/ListBookMark");
+
+        public async Task<Result<bool>> AddFeatured(AddFeaturedRequest dto)
+            => await PostAsync<AddFeaturedRequest, bool>("api/Posts/AddFeatured", dto);
+
+        public async Task<Result<List<FeaturedPostDto>>> ListFeatured()
+            => await GetAsync<List<FeaturedPostDto>>("api/Posts/ListFeatured");
+
+       
+
+        public async Task<Result<int>> AddComment(AddCommentRequest dto)
+            => await PostAsync<AddCommentRequest, int>("api/Posts/AddComment", dto);
+
+        public async Task<Result<int>> UpdateComment(UpdateCommentRequest dto)
+            => await UpdateAsync<UpdateCommentRequest, int>("api/Posts/UpdateComment", dto);
+
+        public async Task<Result<bool>> ToggleLikeComment(ToggleCommentLikeRequest dto)
+            => await PostAsync<ToggleCommentLikeRequest, bool>("api/Posts/ToggleLikeComment", dto);
+
+
+        public async Task<Result<StatisticsDto>> GetPublicStatistics()
+            => await GetAsync<StatisticsDto>("api/Posts/GetPublicStatistics");
+
+        public async Task<Result<StatisticsDto>> GetStatistics()
+            => await GetAsync<StatisticsDto>("api/Posts/GetStatistics");
     }
 }

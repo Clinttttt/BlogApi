@@ -17,9 +17,20 @@ namespace BlogApi.Infrastructure.Configuration.PostConfiguration
             builder.HasKey(s => s.Id);
 
             builder.HasMany(s => s.Comments)
-                .WithOne(s=> s.Post)
+                .WithOne(s => s.Post)
                 .HasForeignKey(s => s.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.HasOne(s => s.User)
+                .WithMany(s => s.Posts)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(p => p.Category)
+                .WithMany(c => c.Posts)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

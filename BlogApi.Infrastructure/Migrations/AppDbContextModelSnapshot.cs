@@ -164,8 +164,7 @@ namespace BlogApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PostId")
-                        .IsUnique();
+                    b.HasIndex("PostId");
 
                     b.ToTable("Featureds");
                 });
@@ -418,8 +417,8 @@ namespace BlogApi.Infrastructure.Migrations
             modelBuilder.Entity("BlogApi.Domain.Entities.Featured", b =>
                 {
                     b.HasOne("BlogApi.Domain.Entities.Post", "Post")
-                        .WithOne("Featured")
-                        .HasForeignKey("BlogApi.Domain.Entities.Featured", "PostId")
+                        .WithMany("Featured")
+                        .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

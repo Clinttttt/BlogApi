@@ -53,7 +53,7 @@
 
 
                 <div class="w-full h-96 overflow-hidden">
-                    <img src="@Preview" class="w-full h-full object-cover" alt="@blogPost.Title" />
+                    <img src="@Preview" class="w-full h-full object-cover" alt="@PostDto.Title" />
                 </div>
 
 
@@ -121,7 +121,7 @@
 
 
                 <div class="mb-8">
-                    <EditForm Model="@commentRequest" OnValidSubmit="HandleSubmitComment" FormName="AddComment">
+                    <EditForm Model="@addCommentRequest" OnValidSubmit="HandleSubmitComment" FormName="AddComment">
                         <div class="flex gap-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
@@ -129,7 +129,7 @@
                                 </div>
                             </div>
                             <div class="flex-1">
-                                <InputTextArea @bind-Value="commentRequest.Content"
+                                <InputTextArea @bind-Value="addCommentRequest.Content"
                                                placeholder="Add a comment..."
                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                                                rows="3" />
@@ -180,149 +180,77 @@
     </div>
 </div>
 
-@code {
 
+@code {
     [Parameter]
     public int PostId { get; set; }
-    private PostWithCommentsDto? PostDto;
-    bool hasrender = false;
+
+    private PostDetailDto? PostDto;
+    private bool hasrender = false;
     public string? Preview { get; set; }
     private int CommentId { get; set; }
     private bool isLiked = false;
     private bool commentisliked = false;
-    private GetPostWithCommentsRequest postId { get; set; } = new GetPostWithCommentsRequest();
-    private ToggleCommentLikeRequest addCommentLike { get; set; } = new ToggleCommentLikeRequest();
-    private CommentRequest commentRequest { get; set; } = new CommentRequest();
-    private AddBookMarkRequest addBookMarkRequest { get; set; } = new AddBookMarkRequest();
 
+    private GetPostRequest postRequest { get; set; } = new GetPostRequest();
+    private ToggleCommentLikeRequest toggleCommentLikeRequest { get; set; } = new ToggleCommentLikeRequest();
+    private AddCommentRequest addCommentRequest { get; set; } = new AddCommentRequest();
+    private AddBookMarkRequest addBookMarkRequest { get; set; } = new AddBookMarkRequest();
+    private TogglePostLikeRequest togglePostLikeRequest { get; set; } = new TogglePostLikeRequest();
     private bool islike { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool first)
     {
         if (!hasrender && first)
-            if (!hasrender && first)
-            {
-                hasrender = true;
-                postId.PostId = PostId;
-                addBookMarkRequest.PostId = PostId;
-                var result = await PostClient.Get(postId);
-                PostDto = result.Value;
+        {
+            hasrender = true;
+            postRequest.PostId = PostId;
+            addBookMarkRequest.PostId = PostId;
+            togglePostLikeRequest.PostId = PostId;
 
-                if (PostDto?.Photo is not null)
-                {
-                    Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
-                }
+            var result = await PostClient.Get(postRequest);
+            PostDto = result.Value;
+
+            if (PostDto?.Photo is not null)
+            {
+                Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
             }
+        }
         StateHasChanged();
     }
 
     private async Task HandleSubmitComment()
     {
-        commentRequest.Id = PostId;
-        var request_comment = await PostClient.CreateComment(commentRequest);
-        var result = await PostClient.Get(postId);
+        addCommentRequest.PostId = PostId;
+        var request_comment = await PostClient.AddComment(addCommentRequest);
+        var result = await PostClient.Get(postRequest);
         PostDto = result.Value;
-        commentRequest = new CommentRequest();
+        addCommentRequest = new AddCommentRequest();
         StateHasChanged();
     }
+
     public async Task GetCommentId(int commentId)
     {
-        addCommentLike.CommentId = commentId;
-        await PostClient.CommentLike(addCommentLike);
-
-        var result = await PostClient.Get(postId);
-        PostDto = result.Value;  
+        toggleCommentLikeRequest.CommentId = commentId;
+        await PostClient.ToggleLikeComment(toggleCommentLikeRequest);
+        var result = await PostClient.Get(postRequest);
+        PostDto = result.Value;
         StateHasChanged();
     }
+
     private async Task HandlePostLike()
     {
-        var request = await PostClient.PostLike(PostId);
-        var result = await PostClient.Get(postId);
-        PostDto = result.Value;    
+        var request = await PostClient.ToggleLikePost(togglePostLikeRequest);
+        var result = await PostClient.Get(postRequest);
+        PostDto = result.Value;
         StateHasChanged();
     }
+
     public async Task HandleBookMark()
     {
         var request = await PostClient.AddBookMark(addBookMarkRequest);
-        var result = await PostClient.Get(postId);
+        var result = await PostClient.Get(postRequest);
         PostDto = result.Value;
         StateHasChanged();
-    }
-
-
-
-   
-
-    private bool isBookmarked = false;
-    private int likeCount = 42;
-    private BlogPost blogPost = new()
-    {
-        Title = "Getting Started with CQRS and MediatR in .NET",
-        Category = "CQRS",
-        Author = "Tech Blog Author",
-        Date = "Dec 15, 2025",
-        ReadTime = "6 min read",
-        Tags = new List<string> { "cqrs", "mediatr", ".net-core", "clean-architecture" }
-    };
-
-    private List<Comment> comments = new()
-    {
-        new Comment
-        {
-            Id = 1,
-            Author = "John Doe",
-            Avatar = "JD",
-            Date = "2 days ago",
-            Content = "Great article! This really helped me understand CQRS pattern better. Looking forward to implementing this in my project.",
-            Likes = 5
-        },
-        new Comment
-        {
-            Id = 2,
-            Author = "Sarah Smith",
-            Avatar = "SS",
-            Date = "1 day ago",
-            Content = "Thanks for sharing this! The code examples are very clear and practical.",
-            Likes = 3
-        }
-    };
-
-    private CommentForm commentForm = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Load blog post data by Id
-        // blogPost = await BlogService.GetByIdAsync(Id);
-    }
-
-    private void HandleLike()
-    {
-        isLiked = !isLiked;
-        likeCount = isLiked ? likeCount + 1 : likeCount - 1;
-    }
-
-    public class BlogPost
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string Author { get; set; } = string.Empty;
-        public string Date { get; set; } = string.Empty;
-        public string ReadTime { get; set; } = string.Empty;
-        public List<string> Tags { get; set; } = new();
-    }
-
-    public class Comment
-    {
-        public int Id { get; set; }
-        public string Author { get; set; } = string.Empty;
-        public string Avatar { get; set; } = string.Empty;
-        public string Date { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public int Likes { get; set; }
-    }
-
-    public class CommentForm
-    {
-        public string Content { get; set; } = string.Empty;
     }
 }

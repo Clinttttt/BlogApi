@@ -11,5 +11,7 @@ namespace BlogApi.Application.Dtos
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Slug { get; set; }
+        public int? CategoryCount { get; set; }
+        public int AllPost { get; set; }
     }
 }

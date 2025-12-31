@@ -11,6 +11,7 @@ namespace BlogApi.Domain.Enums
     {
         public enum Status
         {
+            Pending,
             Published,
             Draft
         }

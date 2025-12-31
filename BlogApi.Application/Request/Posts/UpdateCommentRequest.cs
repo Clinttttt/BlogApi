@@ -9,10 +9,10 @@ namespace BlogApi.Application.Request.Posts
 {
     public class UpdateCommentRequest
     {
-        public int Id { get; set; }
-        public string Comment { get; set; } = string.Empty;
+        public int CommentId { get; set; }
+        public string Content { get; set; } = string.Empty;
 
-        public UpdateCommentCommand UpdateCommand(Guid UserId)
-            => new(Id, Comment,UserId);
+        public UpdateCommentCommand ToCommand(Guid userId)
+            => new(CommentId, Content, userId);
     }
 }

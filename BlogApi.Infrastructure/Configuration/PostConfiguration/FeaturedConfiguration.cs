@@ -14,8 +14,8 @@ namespace BlogApi.Infrastructure.Configuration.PostConfiguration
         public void Configure(EntityTypeBuilder<Featured> builder)
         {
             builder.HasOne(s => s.Post)
-                .WithOne(s => s.Featured)
-                .HasForeignKey<Featured>(s => s.PostId)
+                .WithMany(s => s.Featured)
+                .HasForeignKey(s => s.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

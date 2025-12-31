@@ -9,9 +9,9 @@ namespace BlogApi.Application.Request.Posts
 {
     public class DeletePostRequest
     {
-        public int Id { get; set; }
+        public int PostId { get; set; }
 
-        public DeletePostCommand DeleteCommand(Guid UserId)
-            => new(Id, UserId);
+        public DeletePostCommand ToCommand(Guid userId)
+            => new(PostId, userId);
     }
 }

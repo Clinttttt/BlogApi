@@ -4,8 +4,10 @@ using BlogApi.Application.Commands.Newsletter.SubscribeToNewsletter;
 using BlogApi.Application.Commands.Newsletter.UnSubscribeToNewsletter;
 using BlogApi.Application.Common.Interfaces;
 using BlogApi.Application.Dtos;
-using BlogApi.Application.Queries.Posts.GetUserInfo;
+
 using BlogApi.Application.Queries.User.CurrentUser;
+using BlogApi.Application.Queries.User.GetListAuthor;
+using BlogApi.Application.Queries.User.GetUserInfo;
 using BlogApi.Application.Request.Newsletter;
 using BlogApi.Application.Request.User;
 using BlogApi.Domain.Common;
@@ -36,6 +38,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+
         [Authorize]
         [HttpPatch("UpdateUserInfo")]
         public async Task<ActionResult<bool>> UpdateUserInfo(UserInfoRequest request)
@@ -44,14 +47,16 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+
         [AllowAnonymous]
         [HttpGet("GetCurrentUser")]
         public async Task<ActionResult<UserProfileDto>> GetCurrentUser()
         {
-            var command = new GetCurrentUserQuery(UserIdOrNull);
+            var command = new GetPreviewQuery(UserIdOrNull);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+
         [Authorize]
         [HttpGet("GetUserInfoDto")]
         public async Task<ActionResult<UserInfoDto>> GetUserInfoDto()
@@ -60,6 +65,17 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+
+        [Authorize]
+        [HttpGet("GetListAuthor")]
+        public async Task<ActionResult<List<AuthorDto>>> GetListAuthor()
+        {
+            var command = new GetListAuthorQuery();
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+
+
 
         [AllowAnonymous]
         [HttpPost("SubscribeToNewsletter")]
