@@ -24,7 +24,7 @@ namespace BlogApi.Api.Controllers
 
       
 
-        [Authorize]
+         [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddPost")]
         public async Task<ActionResult<int>> AddPost([FromBody] CreatePostRequest request)
         {
@@ -42,7 +42,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPatch("UpdatePost")]
         public async Task<ActionResult<int>> UpdatePost([FromBody] UpdatePostRequest request)
         {
@@ -51,7 +51,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpDelete("DeletePost")]
         public async Task<ActionResult<bool>> DeletePost([FromQuery] DeletePostRequest request)
         {
@@ -60,7 +60,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPatch("ArchivedPost")]
         public async Task<ActionResult<bool>> ArchivedPost([FromQuery] ArchivePostRequest request)
         {
@@ -72,7 +72,7 @@ namespace BlogApi.Api.Controllers
 
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("ListForAdmin")]
         public async Task<ActionResult<PagedResult<PostDto>>> ListForAdmin(
              [FromQuery] ListForAdminPostsRequest request,
@@ -112,11 +112,11 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-      
 
 
 
-        [Authorize]
+
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("ToggleLikePost")]
         public async Task<ActionResult<bool>> ToggleLikePost([FromQuery] TogglePostLikeRequest request)
         {
@@ -125,7 +125,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddBookMark")]
         public async Task<ActionResult<bool>> AddBookMark([FromQuery] AddBookMarkRequest request)
         {
@@ -134,7 +134,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpGet("ListBookMark")]
         public async Task<ActionResult<List<PostDto>>> ListBookMark()
         {
@@ -143,7 +143,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddFeatured")]
         public async Task<ActionResult<bool>> AddFeatured([FromBody] AddFeaturedRequest request)
         {
@@ -161,11 +161,11 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-    
 
 
 
-        [Authorize]
+
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddComment")]
         public async Task<ActionResult<int>> AddComment([FromBody] AddCommentRequest request)
         {
@@ -174,7 +174,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPatch("UpdateComment")]
         public async Task<ActionResult<int>> UpdateComment([FromBody] UpdateCommentRequest request)
         {
@@ -183,7 +183,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("ToggleLikeComment")]
         public async Task<ActionResult<bool>> ToggleLikeComment([FromBody] ToggleCommentLikeRequest request)
         {
@@ -204,7 +204,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetStatistics")]
         public async Task<ActionResult<StatisticsDto>> GetStatistics()
         {
@@ -213,7 +213,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost("ApprovePost")]
         public async Task<ActionResult<bool>> ApprovePost([FromQuery] ApprovePostCommand command)
         {

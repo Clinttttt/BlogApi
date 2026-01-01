@@ -27,6 +27,7 @@ namespace BlogApi.Application.Queries.Posts.GetListByTag
                 Title = s.Title,
                 Content = s.Content,
                 CreatedAt = s.CreatedAt,
+                Status = s.Status,
                 CategoryName = s.Category.Name,
                 readingDuration = s.readingDuration,
                 Tags = s.PostTags.Select(s => new TagDto

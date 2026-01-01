@@ -18,7 +18,7 @@ namespace BlogApi.Api.Controllers
         public CategoryController(ISender sender) : base(sender) { }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("CreateCategory")]
         public async Task<ActionResult<bool>> Create([FromBody] AddCategoryRequest request)
         {
@@ -34,7 +34,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(query);
             return HandleResponse(result);
         }
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpDelete("DeleteCategory/{Id}")]
         public async Task<ActionResult<bool>> Delete([FromQuery] int Id)
         {
@@ -42,7 +42,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("UnlinkCategory")]
         public async Task<ActionResult<bool>> Unlink([FromBody] UnlinkCategoryRequest request)
         {
@@ -50,7 +50,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("LinkCategory")]
         public async Task<ActionResult<bool>> link([FromBody] LinkCategoryRequest request)
         {

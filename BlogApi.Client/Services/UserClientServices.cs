@@ -18,6 +18,6 @@ namespace BlogApi.Client.Services
         public async Task<Result<bool>> UnSubscribeToNewsletter(string command) => await GetAsync<bool>($"api/User/unsubscribe/{command}");
         public async Task<Result<bool>> AddUserInfo(UserInfoRequest dto) => await PostAsync<UserInfoRequest, bool>("api/User/AddUserInfo", dto);
         public async Task<Result<bool>> UpdateUserInfo(UserInfoRequest dto) =>  await UpdateAsync<UserInfoRequest, bool>("api/User/UpdateUserInfo", dto);
-        public async Task<Result<UserInfoDto>> GetUserInfo() => await GetAsync<UserInfoDto>("api/User/GetUserInfoDto");  
+        public async Task<Result<UserInfoDto>> GetUserInfo() => await GetAsync<UserInfoDto>("api/User/GetUserInfo");  
     }
 }

@@ -1,32 +1,63 @@
-﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
+using Microsoft.JSInterop;
 
 namespace BlogApi.Client.Security
 {
     public class AuthorizationDelegatingHandler : DelegatingHandler
     {
-        private readonly ProtectedLocalStorage _localStorage;
         private readonly ILogger<AuthorizationDelegatingHandler> _logger;
-
+        private readonly IJSRuntime _js;
         private static string? _cachedToken;
         private static DateTime _tokenCacheExpiry = DateTime.MinValue;
         private static readonly object _cacheLock = new();
 
         public AuthorizationDelegatingHandler(
-            ProtectedLocalStorage localStorage,
-            ILogger<AuthorizationDelegatingHandler> logger)
+            ILogger<AuthorizationDelegatingHandler> logger,
+            IJSRuntime js)
         {
-            _localStorage = localStorage;
             _logger = logger;
+            _js = js;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, 
+            CancellationToken cancellationToken)
         {
-            string? token = GetCachedToken() ?? await RetrieveTokenFromStorageAsync();
+            try
+            {
+            
+                string? token = GetCachedToken();
+                
+              
+                if (string.IsNullOrEmpty(token))
+                {                
+                    token = await _js.InvokeAsync<string?>("localStorage.getItem", "AccessToken");
+                                   
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        CacheToken(token);
+                    }
+                }
 
-            if (!string.IsNullOrEmpty(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+              
+                _logger.LogDebug("JSInterop not available during prerendering");
+            }
+            catch (JSException jsEx)
+            {
+                _logger.LogWarning(jsEx, "JavaScript error while retrieving token");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving authentication token");
+            }
 
             return await base.SendAsync(request, cancellationToken);
         }
@@ -41,37 +72,12 @@ namespace BlogApi.Client.Security
             }
         }
 
-        private async Task<string?> RetrieveTokenFromStorageAsync()
-        {
-            try
-            {
-                var tokenResult = await _localStorage.GetAsync<string>("AccessToken");
-
-                if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.Value))
-                {
-                    CacheToken(tokenResult.Value);
-                    return tokenResult.Value;
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                return GetCachedToken();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving token");
-            }
-
-            return null;
-        }
-
         public static void CacheToken(string token)
         {
             lock (_cacheLock)
             {
                 _cachedToken = token;
                 _tokenCacheExpiry = DateTime.UtcNow.AddDays(1);
-
             }
         }
 

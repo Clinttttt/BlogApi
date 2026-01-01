@@ -1,8 +1,6 @@
 ﻿@page "/unsubscribe/{token}"
 
-@inject HttpClient Http
-@rendermode InteractiveServer
-@inject IUserClientServices UserClientService
+
 
 <h3>Unsubscribing...</h3>
 
@@ -14,6 +12,6 @@
     {
         if (string.IsNullOrWhiteSpace(token))
             return;
-        await UserClientService.UnSubscribeToNewsletter(token);
+        await UserClient.UnSubscribeToNewsletter(token);
     }
 }

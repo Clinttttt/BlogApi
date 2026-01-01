@@ -17,7 +17,7 @@ namespace BlogApi.Api.Controllers
         public TagController(ISender sender) : base(sender) { }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddTag")]
         public async Task<ActionResult<int>> Create([FromBody] AddTagRequest request)
         {
@@ -26,7 +26,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpDelete("DeleteTag/{TagId}")]
         public async Task<ActionResult<bool>> Delete([FromQuery] int TagId)
         {
@@ -34,6 +34,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
+
         [AllowAnonymous]
         [HttpGet("GetAllTags")]
         public async Task<ActionResult<List<TagDto>>> GetAllTags()
@@ -42,7 +43,8 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
-        [Authorize]
+
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddTagTopost")]
         public async Task<ActionResult<bool>> AddTagsToPost([FromBody] AddTagsToPostRequest request)
         {

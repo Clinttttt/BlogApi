@@ -37,19 +37,24 @@ namespace BlogApi.Client.Services
             try
             {
                 var result = await _authService.GoogleLogin(idToken);
-
                 if (result.IsSuccess && result.Value != null)
                 {
-                
-                    AuthorizationDelegatingHandler.CacheToken(result.Value.AccessToken!);
+
+                    var accessToken = result.Value.AccessToken!.Trim().Trim('"').Trim();
+                    var refreshToken = result.Value.RefreshToken!.Trim().Trim('"').Trim();
 
 
-                    await _localStorage.SetAsync("AccessToken", result.Value.AccessToken!);
-                    await _localStorage.SetAsync("RefreshToken", result.Value.RefreshToken!);
 
-                    _authStateProvider.MarkUserAsAuthenticated();             
+                    // Cache and store tokens
+                    AuthorizationDelegatingHandler.CacheToken(accessToken);
+                    await _js.InvokeVoidAsync("localStorage.setItem", "AccessToken", accessToken);
+                    await _js.InvokeVoidAsync("localStorage.setItem", "RefreshToken", refreshToken);
+
+
+                    await _authStateProvider.InitializeAsync();
+                    await _authStateProvider.MarkUserAsAuthenticated();
+
                     _navigation.NavigateTo("/", forceLoad: true);
-                    
                 }
                 else
                 {
@@ -69,14 +74,14 @@ namespace BlogApi.Client.Services
         {
             try
             {
-             
+
                 AuthorizationDelegatingHandler.ClearCache();
 
-               
+
                 await _js.InvokeVoidAsync("localStorage.removeItem", "AccessToken");
                 await _js.InvokeVoidAsync("localStorage.removeItem", "RefreshToken");
 
-                
+
                 await _authStateProvider.MarkUserAsLoggedOut();
                 _navigation.NavigateTo("/login", forceLoad: true);
             }

@@ -1,20 +1,8 @@
 ﻿@page "/admin/create-blog"
-
 @rendermode InteractiveServer
-@using BlogApi.Application.Dtos
-@using BlogApi.Application.Request.Category
-@using BlogApi.Application.Request.Posts
-@using BlogApi.Application.Request.Tag
-@using BlogApi.Client.Interface
-@using BlogApi.Domain.Common
-@using BlogApi.Domain.Enums
-@using Microsoft.AspNetCore.Authorization
-@using TinyMCE.Blazor
-@using static BlogApi.Domain.Enums.EntityEnum
-@inject IPostClientService postClient
-@inject ITagClientService tagClient
-@inject ICategoryClientService categoryClient
-@inject NavigationManager Navigation
+
+
+
 
 <div class="h-screen bg-gray-50 py-8 overflow-auto">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -365,8 +353,8 @@
             // Increase delay to ensure token is saved and retrievable
             await Task.Delay(200); // Changed from 50ms to 200ms
 
-            ListCategory = await categoryClient.GetListing();
-            ListTag = await tagClient.GetAllTags();
+            ListCategory = await CategoryClient.GetListing();
+            ListTag = await TagClient.GetAllTags();
 
             isLoading = false;
             StateHasChanged();
@@ -403,11 +391,11 @@
             try
             {
                 AddCat.Name = newCategory;
-                var result = await categoryClient.Create(AddCat);
+                var result = await CategoryClient.Create(AddCat);
 
                 if (result?.IsSuccess == true)
                 {
-                    ListCategory = await categoryClient.GetListing();
+                    ListCategory = await CategoryClient.GetListing();
                     showNewCategory = false;
                     newCategory = string.Empty;
                 }
@@ -463,11 +451,11 @@
             try
             {
                 AddTag.Name = newTag;
-                var result = await tagClient.Create(AddTag);
+                var result = await TagClient.Create(AddTag);
 
                 if (result?.IsSuccess == true && result.Value > 0)
                 {
-                    ListTag = await tagClient.GetAllTags();
+                    ListTag = await TagClient.GetAllTags();
                     selectedTags.Add(result.Value);
                     showNewTag = false;
                     newTag = string.Empty;
@@ -507,7 +495,7 @@
             Post.Status = EntityEnum.Status.Published;
             Post.TagIds = selectedTags;
 
-            var result = await postClient.Create(Post);
+            var result = await PostClient.Create(Post);
 
             if (result?.IsSuccess == true)
             {
@@ -536,7 +524,7 @@
             Post.Status = EntityEnum.Status.Draft;
             Post.TagIds = selectedTags;
 
-            var result = await postClient.Create(Post);
+            var result = await PostClient.Create(Post);
 
             if (result?.IsSuccess == true)
             {

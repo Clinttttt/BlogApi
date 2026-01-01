@@ -4,6 +4,7 @@ using BlogApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227163200_Addd_UserInfo")]
+    partial class Addd_UserInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,9 +127,6 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Property<DateTime>("LinkedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte[]>("ProfilePhotoBytes")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<string>("ProfilePhotoUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -146,27 +146,6 @@ namespace BlogApi.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ExternalLogins");
-                });
-
-            modelBuilder.Entity("BlogApi.Domain.Entities.Featured", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("Featureds");
                 });
 
             modelBuilder.Entity("BlogApi.Domain.Entities.NewsletterSubscriber", b =>
@@ -235,8 +214,6 @@ namespace BlogApi.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Posts");
                 });
@@ -348,19 +325,10 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("PhotoContentType")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("UserInfos");
                 });
@@ -416,17 +384,6 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlogApi.Domain.Entities.Featured", b =>
-                {
-                    b.HasOne("BlogApi.Domain.Entities.Post", "Post")
-                        .WithMany("Featured")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("BlogApi.Domain.Entities.Post", b =>
                 {
                     b.HasOne("BlogApi.Domain.Entities.Category", "Category")
@@ -434,15 +391,7 @@ namespace BlogApi.Infrastructure.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BlogApi.Domain.Entities.User", "User")
-                        .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Category");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BlogApi.Domain.Entities.PostLike", b =>
@@ -475,17 +424,6 @@ namespace BlogApi.Infrastructure.Migrations
                     b.Navigation("tag");
                 });
 
-            modelBuilder.Entity("BlogApi.Domain.Entities.UserInfo", b =>
-                {
-                    b.HasOne("BlogApi.Domain.Entities.User", "User")
-                        .WithOne("UserInfo")
-                        .HasForeignKey("BlogApi.Domain.Entities.UserInfo", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BlogApi.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Posts");
@@ -502,8 +440,6 @@ namespace BlogApi.Infrastructure.Migrations
 
                     b.Navigation("Comments");
 
-                    b.Navigation("Featured");
-
                     b.Navigation("PostLikes");
 
                     b.Navigation("PostTags");
@@ -517,10 +453,6 @@ namespace BlogApi.Infrastructure.Migrations
             modelBuilder.Entity("BlogApi.Domain.Entities.User", b =>
                 {
                     b.Navigation("ExternalLogins");
-
-                    b.Navigation("Posts");
-
-                    b.Navigation("UserInfo");
                 });
 #pragma warning restore 612, 618
         }

@@ -63,7 +63,7 @@ namespace BlogApi.Infrastructure.Services
             if (GoogleUser is null)
                 return Result<TokenResponseDto>.Unauthorized();
 
-          using var transaction = await context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
@@ -72,16 +72,30 @@ namespace BlogApi.Infrastructure.Services
               .FirstOrDefaultAsync(s => s.Email == GoogleUser.Value!.Email);
                 if (user is null)
                 {
+                    var role = !await context.Users.AnyAsync(s => s.Role == "Admin")
+                        ? "Admin"
+                        : "Author";
+
+                    var baseUsername = GoogleUser.Value!.Email.Split('@')[0];
+                    var username = baseUsername;
+                    int counter = 1;
+
+                    while (await context.Users.AnyAsync(s => s.UserName == username))
+                    {
+                        username = $"{baseUsername}{counter}";
+                        counter++;
+                    }
                     user = new User
                     {
-                        UserName = GoogleUser.Value!.Email.Split('@')[0],
+                        UserName = username,
                         Email = GoogleUser.Value.Email,
                         PasswordHash = null!,
-                        Role = "Author"
+                        Role = role,
                     };
                     context.Users.Add(user);
                     await context.SaveChangesAsync();
                 }
+
                 var externalLogin = user.ExternalLogins
             .FirstOrDefault(el => el.Provider == "Google" && el.ProviderId == GoogleUser.Value!.Sub);
 

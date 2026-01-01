@@ -35,10 +35,12 @@ namespace BlogApi.Application.Queries.Posts.GetPostPaged
             var postdto = postpage.Items.Select
                   (s => new PostDto
                   {
+                      Id = s.Id,
                       Title = s.Title,
                       Content = s.Content,
                       CreatedAt = s.CreatedAt,
                       CategoryName = s.Category?.Name,
+                      Status = s.Status,
                       readingDuration = s.readingDuration,
                       Tags = s.PostTags.Select(s => new TagDto
                       {

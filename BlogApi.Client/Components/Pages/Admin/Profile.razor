@@ -1,7 +1,7 @@
 ﻿@page "/profile"
-@rendermode InteractiveServer
-@inject IPostClientService PostClient
-@inject IUserClientServices UserClient
+@attribute [Authorize(Roles = "Admin")]
+
+
 
 <main class="p-6 lg:p-12 max-w-7xl w-full mx-auto h-screen overflow-auto">
     <div class="-mb-12">
@@ -203,18 +203,17 @@
     private UserInfoRequest UpdateInfo { get; set; } = new UserInfoRequest();
     public PagedResult<PostDto>? Posts { get; set; } = new PagedResult<PostDto>();
     public ListForAdminPostsRequest Pagination { get; set; } = new ListForAdminPostsRequest();
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (!hasrender && firstRender)
-        {
-            hasrender = true;
+        
+          
             await ListForAdmin();
             await GetStatistics();
             var userinfo = await UserClient.GetUserInfo();
             if (userinfo.Value is not null)
                 UserInfo = userinfo.Value;
-        }
-        StateHasChanged();
+        hasrender = true;
+       
     }
     
     private async Task HandleUpdate()

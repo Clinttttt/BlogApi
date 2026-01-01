@@ -1,129 +1,72 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.JSInterop;
 using System.Security.Claims;
 
 namespace BlogApi.Client.Security
 {
     public class AuthStateProvider : AuthenticationStateProvider
     {
-        private readonly ProtectedLocalStorage _localStorage;
+        private readonly IJSRuntime _js;
         private bool _isInitialized;
 
-        public AuthStateProvider(ProtectedLocalStorage localStorage)
+        public AuthStateProvider(IJSRuntime js)
         {
-            _localStorage = localStorage;
+            _js = js;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (!_isInitialized)
-                return CreateAnonymousState();
-
             try
             {
-                var tokenResult = await _localStorage.GetAsync<string>("AccessToken");
+                var token = await _js.InvokeAsync<string?>("localStorage.getItem", "AccessToken");
+                if (string.IsNullOrWhiteSpace(token))
+                    return new AuthenticationState(AuthHelpers.CreateAnonymousUser());
 
-                if (!tokenResult.Success || string.IsNullOrWhiteSpace(tokenResult.Value))
-                    return CreateAnonymousState();
-
-                var handler = new JwtSecurityTokenHandler();
-                JwtSecurityToken jwt;
-
-                try
+                var user = JwtHelper.ParseToken(token);
+                if (user is null)
                 {
-                    jwt = handler.ReadJwtToken(tokenResult.Value);
+                    await AuthHelpers.ClearAuthDataAsync(_js);
+                    return new AuthenticationState(AuthHelpers.CreateAnonymousUser());
                 }
-                catch
-                {
-                    await ClearAuthDataAsync();
-                    return CreateAnonymousState();
-                }
-
-                if (jwt.ValidTo < DateTime.UtcNow)
-                {
-                    await ClearAuthDataAsync();
-                    return CreateAnonymousState();
-                }
-
-                var claims = jwt.Claims
-                    .Select(c => c.Type == "role" ? new Claim(ClaimTypes.Role, c.Value) : c)
-                    .ToList();
-
-                var identity = new ClaimsIdentity(claims, "jwt");
-                var user = new ClaimsPrincipal(identity);
 
                 return new AuthenticationState(user);
             }
             catch
             {
-                return CreateAnonymousState();
+                return new AuthenticationState(AuthHelpers.CreateAnonymousUser());
             }
-        }
-
-
-
-      /// <summary>
-      /// ///////////////////////////////////////////////////////////////////////////////////////////
-      /// </summary>
-      /// <returns></returns>
-      /// 
-
-        private AuthenticationState CreateAnonymousState()
-        {
-            var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-            return new AuthenticationState(anonymous);
-        }
-
-        private async Task ClearAuthDataAsync()
-        {
-            try
-            {
-                await _localStorage.DeleteAsync("AccessToken");
-                await _localStorage.DeleteAsync("RefreshToken");
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
-        private async Task NotifyUserChangedAsync()
-        {
-            var authState = await GetAuthenticationStateAsync();
-            NotifyAuthenticationStateChanged(Task.FromResult(authState));
         }
 
         public async Task InitializeAsync()
         {
+            if (_isInitialized) return;
             _isInitialized = true;
-            await NotifyUserChangedAsync();
+            var state = await GetAuthenticationStateAsync();
+            NotifyAuthenticationStateChanged(Task.FromResult(state));
         }
 
-        public void MarkUserAsAuthenticated()
-        {
-            _isInitialized = true;
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        }
+        public async Task MarkUserAsAuthenticated() =>
+            NotifyAuthenticationStateChanged(Task.FromResult(await GetAuthenticationStateAsync()));
 
         public async Task MarkUserAsLoggedOut()
         {
-            await ClearAuthDataAsync();
-            NotifyAuthenticationStateChanged(Task.FromResult(CreateAnonymousState()));
+            await AuthHelpers.ClearAuthDataAsync(_js);
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(AuthHelpers.CreateAnonymousUser())));
         }
 
         public async Task<string?> GetUserIdAsync()
         {
-            var authState = await GetAuthenticationStateAsync();
-            return authState.User.Identity?.IsAuthenticated == true
-                ? authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            var state = await GetAuthenticationStateAsync();
+            return state.User.Identity?.IsAuthenticated == true
+                ? state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 : null;
         }
+
         public async Task<string?> GetUserNameAsync()
         {
-            var authState = await GetAuthenticationStateAsync();
-            return authState.User.Identity?.IsAuthenticated == true
-                ? authState.User.FindFirst(ClaimTypes.Name)?.Value
+            var state = await GetAuthenticationStateAsync();
+            return state.User.Identity?.IsAuthenticated == true
+                ? state.User.FindFirst(ClaimTypes.Name)?.Value
                 : null;
         }
     }

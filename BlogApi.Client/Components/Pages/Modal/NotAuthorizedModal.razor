@@ -1,0 +1,86 @@
+﻿@implements IDisposable
+@inject IJSRuntime JS
+
+<!-- Auto-open modal when not authorized -->
+<input type="checkbox" id="auth_modal" class="modal-toggle" checked />
+<div class="modal modal-open" role="dialog">
+    <div class="modal-box relative max-w-md">
+     
+
+        <label for="auth_modal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+
+        <div class="text-center">
+        
+            <div class="flex justify-center mb-4">
+                <div class="bg-indigo-100 p-4 rounded-full">
+                    <svg class="w-12 h-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-2">Sign In Required</h3>
+            <p class="text-gray-600 mb-6">
+                Please sign in with your Google account to access this page
+            </p>
+
+       
+            <button @onclick="SignInWithGoogle"
+                    class="cursor-pointer w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-blue-500 hover:shadow-lg transition-all font-medium text-base text-gray-700">
+                <svg width="20" height="20" viewBox="0 0 18 18">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                    <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707 0-.593.102-1.17.282-1.709V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.335z" />
+                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
+                </svg>
+                <span>Sign in with Google</span>
+            </button>
+
+            <p class="text-xs text-gray-500 mt-4">
+                By signing in, you agree to our Terms of Service and Privacy Policy
+            </p>
+        </div>
+    </div>
+    <label class="modal-backdrop" for="auth_modal"></label>
+</div>
+
+<div id="hiddenGoogleButton" style="position: absolute; left: -9999px; width: 0; height: 0; overflow: hidden;"></div>
+
+@code {
+    private const string GoogleClientId = "981649586366-fv3d4al1foo7u24bigmuhhhu98uq2fd1.apps.googleusercontent.com";
+    private DotNetObjectReference<NotAuthorizedModal>? _objRef;
+
+    [Parameter]
+    public EventCallback OnAuthenticationSuccess { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initGoogleAuth", GoogleClientId, _objRef);
+        }
+    }
+
+    private async Task SignInWithGoogle()
+    {
+        await JS.InvokeVoidAsync("triggerGoogleSignIn");
+    }
+
+    [JSInvokable]
+    public async Task HandleGoogleCallback(string idToken)
+    {
+        
+        await GoogleCallback.ProcessLogin(idToken);
+
+       
+        await OnAuthenticationSuccess.InvokeAsync();
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
+    }
+}

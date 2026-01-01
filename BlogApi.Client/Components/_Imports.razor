@@ -15,3 +15,28 @@
 @using BlogApi.Client.Services
 @using BlogApi.Application.Models
 @using BlogApi.Application.Request.User
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlogApi.Application.Request.Category
+@using BlogApi.Application.Request.Tag
+@using BlogApi.Domain.Common
+@using BlogApi.Domain.Enums
+@using TinyMCE.Blazor
+@using static BlogApi.Domain.Enums.EntityEnum
+@using BlogApi.Client.Components.Pages.Modal
+@using BlogApi.Client.Components.Pages.Admin
+@using BlogApi.Client.Components.Pages.Public
+@using BlogApi.Client.Components.Pages.Author
+
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject GoogleAuthCallbackService GoogleCallback
+@inject IUserClientServices UserClient
+@inject IUserClientServices ClientService
+@inject ICategoryClientService CategoryClient
+@inject ITagClientService TagClient
+@inject IPostClientService PostClient
+@inject ITagClientService TagClient
+@inject ICategoryClientService CategoryClient
+

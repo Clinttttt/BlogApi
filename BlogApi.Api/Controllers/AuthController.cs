@@ -40,7 +40,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(login);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("Logout")]
         public async Task<ActionResult<bool>> Logout([FromQuery] LogoutRequest request)
         {

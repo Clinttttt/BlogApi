@@ -35,6 +35,7 @@ namespace BlogApi.Application.Queries.Posts.GetByCategory
                 Content = s.Content,
                 CreatedAt = s.CreatedAt,
                 CategoryName = s.Category.Name,
+                Status = s.Status,
                 readingDuration = s.readingDuration,
                 Tags = s.PostTags.Select(s => new TagDto
                 {

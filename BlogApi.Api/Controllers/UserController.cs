@@ -30,7 +30,7 @@ namespace BlogApi.Api.Controllers
             _emailService = emailService;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddUserInfo")]
         public async Task<ActionResult<bool>> AddUserInfo(UserInfoRequest request)
         {
@@ -39,7 +39,7 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpPatch("UpdateUserInfo")]
         public async Task<ActionResult<bool>> UpdateUserInfo(UserInfoRequest request)
         {
@@ -57,16 +57,16 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
-        [HttpGet("GetUserInfoDto")]
-        public async Task<ActionResult<UserInfoDto>> GetUserInfoDto()
+        [Authorize(Roles = "Admin,Author")]
+        [HttpGet("GetUserInfo")]
+        public async Task<ActionResult<UserInfoDto>> GetUserInfo()
         {
             var command = new GetUserInfoQuery(UserId);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Author")]
         [HttpGet("GetListAuthor")]
         public async Task<ActionResult<List<AuthorDto>>> GetListAuthor()
         {
@@ -92,7 +92,7 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(request);
             return HandleResponse(result);
         }
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost("SendNewsletter")]
         public async Task<ActionResult<bool>> SendNewsletter([FromBody] SendNewsletterRequest request)
         {

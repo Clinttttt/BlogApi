@@ -25,7 +25,7 @@ namespace BlogApi.Infrastructure.Configuration.PostConfiguration
             builder.HasOne(s => s.User)
                 .WithMany(s => s.Posts)
                 .HasForeignKey(s => s.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(p => p.Category)
                 .WithMany(c => c.Posts)
