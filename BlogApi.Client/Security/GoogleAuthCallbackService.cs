@@ -1,9 +1,7 @@
 ﻿using BlogApi.Client.Interface;
 using BlogApi.Client.Security;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
 
 namespace BlogApi.Client.Services
 {
@@ -12,24 +10,21 @@ namespace BlogApi.Client.Services
         private readonly IAuthClientService _authService;
         private readonly NavigationManager _navigation;
         private readonly AuthStateProvider _authStateProvider;
-        private readonly ProtectedLocalStorage _localStorage;
-        private readonly IJSRuntime _js;
         private readonly ILogger<GoogleAuthCallbackService> _logger;
+        private readonly TokenCacheService _tokenCache;
 
         public GoogleAuthCallbackService(
             IAuthClientService authService,
             NavigationManager navigation,
             AuthStateProvider authStateProvider,
-            ProtectedLocalStorage localStorage,
-            IJSRuntime js,
-            ILogger<GoogleAuthCallbackService> logger)
+            ILogger<GoogleAuthCallbackService> logger,
+            TokenCacheService tokenCache)
         {
             _authService = authService;
             _navigation = navigation;
             _authStateProvider = authStateProvider;
-            _js = js;
-            _localStorage = localStorage;
             _logger = logger;
+            _tokenCache = tokenCache;
         }
 
         public async Task ProcessLogin(string idToken)
@@ -39,22 +34,17 @@ namespace BlogApi.Client.Services
                 var result = await _authService.GoogleLogin(idToken);
                 if (result.IsSuccess && result.Value != null)
                 {
-
                     var accessToken = result.Value.AccessToken!.Trim().Trim('"').Trim();
                     var refreshToken = result.Value.RefreshToken!.Trim().Trim('"').Trim();
 
+                    // Cache token in memory
+                    _tokenCache.CacheToken(accessToken);
 
+                    // Redirect to middleware endpoint to set cookies
+                    var encodedAccessToken = Uri.EscapeDataString(accessToken);
+                    var encodedRefreshToken = Uri.EscapeDataString(refreshToken);
 
-                    // Cache and store tokens
-                    AuthorizationDelegatingHandler.CacheToken(accessToken);
-                    await _js.InvokeVoidAsync("localStorage.setItem", "AccessToken", accessToken);
-                    await _js.InvokeVoidAsync("localStorage.setItem", "RefreshToken", refreshToken);
-
-
-                    await _authStateProvider.InitializeAsync();
-                    await _authStateProvider.MarkUserAsAuthenticated();
-
-                    _navigation.NavigateTo("/", forceLoad: true);
+                    _navigation.NavigateTo($"/_auth/setcookie?access_token={encodedAccessToken}&refresh_token={encodedRefreshToken}", forceLoad: true);
                 }
                 else
                 {
@@ -70,26 +60,22 @@ namespace BlogApi.Client.Services
             }
         }
 
-        public async Task ProcessLogout()
+        public Task ProcessLogout()
         {
             try
             {
+                _tokenCache.ClearCache();
 
-                AuthorizationDelegatingHandler.ClearCache();
-
-
-                await _js.InvokeVoidAsync("localStorage.removeItem", "AccessToken");
-                await _js.InvokeVoidAsync("localStorage.removeItem", "RefreshToken");
-
-
-                await _authStateProvider.MarkUserAsLoggedOut();
-                _navigation.NavigateTo("/login", forceLoad: true);
+                // Redirect to middleware endpoint to clear cookies
+                _navigation.NavigateTo("/_auth/clearcookie", forceLoad: true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception during logout");
                 throw;
             }
+
+            return Task.CompletedTask;
         }
     }
 }

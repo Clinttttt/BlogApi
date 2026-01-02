@@ -2,7 +2,6 @@
 using BlogApi.Client.Security;
 using BlogApi.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BlogApi.Client
@@ -18,33 +17,41 @@ namespace BlogApi.Client
 
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-           
-            services.AddScoped<GoogleAuthCallbackService>();
-            services.AddScoped<ProtectedLocalStorage>();        
-            services.AddScoped<AuthorizationDelegatingHandler>();
+            // Required for cookie access
+            services.AddHttpContextAccessor();
 
+            // Security services (scoped per circuit)
+            services.AddScoped<TokenCacheService>();
+            services.AddScoped<GoogleAuthCallbackService>();
+            services.AddScoped<AuthorizationDelegatingHandler>();
+            services.AddScoped<RefreshTokenDelegatingHandler>();
 
             services.AddHttpClient<IAuthClientService, AuthClientService>("AuthClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7096");
             });
-       
+
             services.AddHttpClient("Api", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7096");
-            }).AddHttpMessageHandler<AuthorizationDelegatingHandler>();       
+            })
+                  .AddHttpMessageHandler<RefreshTokenDelegatingHandler>() // ADD THIS FIRST
+    .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationDelegatingHandler>());
+
             services.AddScoped<IPostClientService>(sp =>
             {
                 var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient("Api");
                 return new PostClientService(httpClient);
-            });        
+            });
+
             services.AddScoped<ICategoryClientService>(sp =>
             {
                 var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient("Api");
                 return new CategoryClientService(httpClient);
-            });          
+            });
+
             services.AddScoped<ITagClientService>(sp =>
             {
                 var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
@@ -54,38 +61,35 @@ namespace BlogApi.Client
 
             services.AddScoped<IUserClientServices>(sp =>
             {
-              var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-              var httpClient = httpClientFactory.CreateClient("Api");
+                var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient("Api");
                 return new UserClientServices(httpClient);
             });
+
             return services;
         }
 
         public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
         {
-
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(options =>
-        {
-            options.LoginPath = "/"; 
-            options.AccessDeniedPath = "/access-denied"; 
-            options.Events.OnRedirectToLogin = context =>
-            {
-               
-                if (context.Request.Path.StartsWithSegments("/api"))
+                .AddCookie(options =>
                 {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                }
+                    options.LoginPath = "/";
+                    options.AccessDeniedPath = "/access-denied";
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api"))
+                        {
+                            context.Response.StatusCode = 401;
+                            return Task.CompletedTask;
+                        }
 
-                // for page requests, redirect to login
-                context.Response.Redirect(context.RedirectUri);
-                return Task.CompletedTask;
-            };
-        });
+                        context.Response.Redirect(context.RedirectUri);
+                        return Task.CompletedTask;
+                    };
+                });
 
             services.AddAuthorizationCore();
-          
 
             services.AddScoped<AuthStateProvider>();
             services.AddScoped<AuthenticationStateProvider>(provider =>

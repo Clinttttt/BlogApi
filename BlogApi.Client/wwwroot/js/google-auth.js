@@ -1,4 +1,4 @@
-window.currentComponent = null;
+﻿window.currentComponent = null;
 
 window.initGoogleAuth = async (clientId, dotNetRef) => {
     while (typeof google === 'undefined' || !google.accounts) {
@@ -12,27 +12,20 @@ window.initGoogleAuth = async (clientId, dotNetRef) => {
         callback: handleCredentialResponse
     });
 
-    const hiddenDiv = document.getElementById('hiddenGoogleButton');
-    if (hiddenDiv) {
-        google.accounts.id.renderButton(hiddenDiv, {
+  
+    const container = document.getElementById('googleButtonContainer');
+    if (container) {
+        google.accounts.id.renderButton(container, {
             theme: 'outline',
-            size: 'large'
+            size: 'large',
+            width: 243,
+            text: 'signin_with',
+            shape: 'rectangular'
         });
     }
 };
-
 function handleCredentialResponse(response) {
     if (window.currentComponent && response.credential) {
         window.currentComponent.invokeMethodAsync('HandleGoogleCallback', response.credential);
     }
 }
-
-window.triggerGoogleSignIn = () => {
-    const hiddenDiv = document.getElementById('hiddenGoogleButton');
-    if (hiddenDiv) {
-        const googleButton = hiddenDiv.querySelector('div[role="button"]');
-        if (googleButton) {
-            googleButton.click();
-        }
-    }
-};

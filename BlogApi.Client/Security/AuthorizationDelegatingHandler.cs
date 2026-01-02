@@ -1,93 +1,45 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
-using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Http;
 
 namespace BlogApi.Client.Security
 {
     public class AuthorizationDelegatingHandler : DelegatingHandler
     {
         private readonly ILogger<AuthorizationDelegatingHandler> _logger;
-        private readonly IJSRuntime _js;
-        private static string? _cachedToken;
-        private static DateTime _tokenCacheExpiry = DateTime.MinValue;
-        private static readonly object _cacheLock = new();
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthorizationDelegatingHandler(
             ILogger<AuthorizationDelegatingHandler> logger,
-            IJSRuntime js)
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
-            _js = js;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, 
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             try
             {
-            
-                string? token = GetCachedToken();
-                
-              
-                if (string.IsNullOrEmpty(token))
-                {                
-                    token = await _js.InvokeAsync<string?>("localStorage.getItem", "AccessToken");
-                                   
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        CacheToken(token);
-                    }
-                }
+                var httpContext = _httpContextAccessor.HttpContext;
 
-                if (!string.IsNullOrEmpty(token))
+                if (httpContext != null &&
+                    httpContext.Request.Cookies.TryGetValue("AccessToken", out var token) &&
+                    !string.IsNullOrWhiteSpace(token))
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    token = token.Trim().Trim('"').Trim();
+                    request.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token);
                 }
-            }
-            catch (InvalidOperationException)
-            {
-              
-                _logger.LogDebug("JSInterop not available during prerendering");
-            }
-            catch (JSException jsEx)
-            {
-                _logger.LogWarning(jsEx, "JavaScript error while retrieving token");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving authentication token");
+                _logger.LogError(ex, "Error attaching auth token");
             }
 
-            return await base.SendAsync(request, cancellationToken);
-        }
-
-        private string? GetCachedToken()
-        {
-            lock (_cacheLock)
-            {
-                return !string.IsNullOrEmpty(_cachedToken) && DateTime.UtcNow < _tokenCacheExpiry
-                    ? _cachedToken
-                    : null;
-            }
-        }
-
-        public static void CacheToken(string token)
-        {
-            lock (_cacheLock)
-            {
-                _cachedToken = token;
-                _tokenCacheExpiry = DateTime.UtcNow.AddDays(1);
-            }
-        }
-
-        public static void ClearCache()
-        {
-            lock (_cacheLock)
-            {
-                _cachedToken = null;
-                _tokenCacheExpiry = DateTime.MinValue;
-            }
+            return base.SendAsync(request, cancellationToken);
         }
     }
 }

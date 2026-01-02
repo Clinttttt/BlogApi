@@ -1,22 +1,79 @@
-﻿
+﻿@inject AuthStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject ILogger<App> Logger
 
 @rendermode InteractiveServer
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="typeof(Program).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="routeData"
-                                DefaultLayout="typeof(Layout.MainLayout)">
-                <NotAuthorized>
-                    <NotAuthorizedModal OnAuthenticationSuccess="HandleAuthSuccess" />
-                </NotAuthorized>
-            </AuthorizeRouteView>
-        </Found>
-    </Router>
-</CascadingAuthenticationState>
+@if (_isAuthInitialized)
+{
+    <CascadingAuthenticationState>
+        <Router AppAssembly="typeof(Program).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="routeData"
+                                    DefaultLayout="typeof(Layout.MainLayout)">
+                    <NotAuthorized>
+                        <NotAuthorizedModal OnAuthenticationSuccess="HandleAuthSuccess" />
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </Found>
+        </Router>
+    </CascadingAuthenticationState>
+}
+else
+{
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div style="text-align: center;">
+            <p>Initializing...</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
+}
+
+<style>
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
 
 @code {
-  
+    private bool _isAuthInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                Logger.LogInformation("Starting authentication initialization...");
+                
+             
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                
+                Logger.LogInformation("Authentication initialized successfully");             
+
+                _isAuthInitialized = true;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error initializing authentication");
+                             
+                _isAuthInitialized = true;
+                StateHasChanged();
+            }
+        }
+    }
 
     private void HandleAuthSuccess()
     {    
