@@ -1,0 +1,47 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Blog.Client.State
+@using BlogApi.Client.Security
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Blog.Client
+@using Blog.Client.Components
+@using BlogApi.Client.Interface
+@using BlogApi.Application.Dtos
+@using BlogApi.Application.Request.Posts
+@using BlogApi.Domain.Helper
+@using BlogApi.Client.Services
+@using BlogApi.Application.Models
+@using BlogApi.Application.Request.User
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlogApi.Application.Request.Category
+@using BlogApi.Application.Request.Tag
+@using BlogApi.Domain.Common
+@using BlogApi.Domain.Enums
+@using TinyMCE.Blazor
+@using static BlogApi.Domain.Enums.EntityEnum
+@using Blog.Client.Components.Pages.Modal
+@using Blog.Client.Components.Pages.Admin
+@using Blog.Client.Components.Pages.Public
+@using Blog.Client.Components.Pages.Author
+@using Blog.Client.Components.Pages.Author.Components
+
+
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject GoogleAuthCallbackService GoogleCallback
+@inject IUserClientServices UserClient
+@inject IUserClientServices ClientService
+@inject ICategoryClientService CategoryClient
+@inject ITagClientService TagClient
+@inject IPostClientService PostClient
+@inject ITagClientService TagClient
+@inject ICategoryClientService CategoryClient
+@inject AuthStateProvider AuthStateProvider
+@inject PageState PageState

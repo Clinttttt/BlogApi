@@ -1,0 +1,245 @@
+﻿@page "/author"
+
+
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-screen overflow-auto pb-15">
+
+  
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, Author! </h1>
+                    <p class="text-gray-600">Manage your posts and content</p>
+                </div>
+                <button @onclick="CreateNewPost"
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create New Post
+                </button>
+            </div>
+
+         
+        </div>
+  
+        <div class="flex flex-row justify-between bg-white rounded-2xl shadow-sm p-4 mb-6 ">
+            <div class="flex gap-2">
+                <button @onclick="()=> PageState.View(PageState.PostState.all_post)" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @(currentFilter == "all" ? "bg-indigo-100 text-indigo-600" : "text-gray-600 hover:bg-gray-100")">
+                    All Posts
+                </button>
+                <button @onclick="() => PageState.View(PageState.PostState.published)" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @(currentFilter == "published" ? "bg-green-100 text-green-600" : "text-gray-600 hover:bg-gray-100")">
+                    Published
+                </button>
+                <button @onclick="() => PageState.View(PageState.PostState.pending)" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @(currentFilter == "pending" ? "bg-yellow-100 text-yellow-600" : "text-gray-600 hover:bg-gray-100")">
+                    Pending Approval
+                </button>
+                <button @onclick="() => PageState.View(PageState.PostState.drafts)" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @(currentFilter == "draft" ? "bg-gray-200 text-gray-700" : "text-gray-600 hover:bg-gray-100")">
+                    Drafts
+                </button>
+            </div>
+           <div>
+                <button @onclick="() => PageState.View(PageState.PostState.bookmarks)" class="btn btn-ghost btn-square bg-indigo-50 hover:bg-indigo-50">
+                    <svg class="w-6 h-6 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" d="m17 21-5-4-5 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h8.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z" />
+                    </svg>
+                </button>
+           </div>
+        </div>
+
+        @if (PageState.PostView == PageState.PostState.all_post)
+        {
+
+            <AllPosts  />
+
+        }
+        else if (PageState.PostView == PageState.PostState.drafts)
+        {
+
+            <Drafts />
+
+        }
+        else if (PageState.PostView == PageState.PostState.pending)
+        {
+
+            <Pending />
+
+        }
+        else if (PageState.PostView == PageState.PostState.published)
+        {
+
+            <Published ListPost="myPosts" />
+
+        }
+        else if (PageState.PostView == PageState.PostState.bookmarks)
+        {
+
+            <BookMarks />
+
+        }
+    </div>
+</div>
+
+<style>
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+
+
+@code {
+    private int totalPosts => myPosts?.Count ?? 0;
+    private int publishedPosts => myPosts?.Count(p => p.Status == "published") ?? 0;
+    private int pendingPosts => myPosts?.Count(p => p.Status == "pending") ?? 0;
+    private int bookmarksCount = 12; // This will be loaded from API later
+    private string currentFilter = "all";
+
+    private List<AuthorPost>? myPosts;
+    private List<AuthorPost>? filteredPosts;
+
+    public class AuthorPost
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Excerpt { get; set; } = string.Empty;
+        public string Status { get; set; } = "draft"; // draft, pending, published
+        public DateTime CreatedAt { get; set; }
+        public int Likes { get; set; }
+        public int Comments { get; set; }
+        public int Views { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        // Simulate loading
+        await Task.Delay(300);
+
+        // Sample posts
+        myPosts = new List<AuthorPost>
+        {
+            new AuthorPost
+            {
+                Id = 1,
+                Title = "Getting Started with CQRS and MediatR in .NET",
+                Excerpt = "Command Query Responsibility Segregation (CQRS) is a powerful architectural pattern that separates read and write operations into different models. When combined with MediatR, it provides a clean and maintainable way to structure your .NET applications. In this comprehensive guide, we'll explore how to implement CQRS patterns effectively.",
+                Status = "published",
+                CreatedAt = DateTime.Now.AddDays(-10),
+                Likes = 124,
+                Comments = 15,
+                Views = 1250
+            },
+            new AuthorPost
+            {
+                Id = 2,
+                Title = "Advanced Blazor Component Patterns",
+                Excerpt = "Explore advanced patterns for building reusable Blazor components. Learn about component communication, state management, and how to create highly maintainable component libraries that scale with your application needs.",
+                Status = "pending",
+                CreatedAt = DateTime.Now.AddDays(-3),
+                Likes = 0,
+                Comments = 0,
+                Views = 0
+            },
+            new AuthorPost
+            {
+                Id = 3,
+                Title = "Entity Framework Core Performance Tips",
+                Excerpt = "Optimize your EF Core queries for better performance. This article covers the top 10 performance tips every developer should know, from query optimization to proper use of tracking and AsNoTracking methods for efficient database operations.",
+                Status = "published",
+                CreatedAt = DateTime.Now.AddDays(-20),
+                Likes = 89,
+                Comments = 12,
+                Views = 890
+            },
+            new AuthorPost
+            {
+                Id = 4,
+                Title = "Building Microservices with .NET",
+                Excerpt = "A comprehensive guide to microservices architecture using .NET. Learn how to design, build, and deploy scalable microservices that communicate effectively and maintain data consistency across distributed systems.",
+                Status = "draft",
+                CreatedAt = DateTime.Now.AddDays(-1),
+                Likes = 0,
+                Comments = 0,
+                Views = 0
+            },
+            new AuthorPost
+            {
+                Id = 5,
+                Title = "Understanding Clean Architecture",
+                Excerpt = "Deep dive into clean architecture principles and patterns for .NET applications. Discover how to structure your code for maximum maintainability, testability, and flexibility while keeping your business logic independent of frameworks.",
+                Status = "published",
+                CreatedAt = DateTime.Now.AddDays(-30),
+                Likes = 201,
+                Comments = 28,
+                Views = 2100
+            },
+            new AuthorPost
+            {
+                Id = 6,
+                Title = "Docker Containers for .NET Developers",
+                Excerpt = "Learn how to containerize your .NET applications with Docker. This guide walks through creating efficient Dockerfiles, multi-stage builds, and deploying your containerized applications to production environments.",
+                Status = "pending",
+                CreatedAt = DateTime.Now.AddDays(-2),
+                Likes = 0,
+                Comments = 0,
+                Views = 0
+            }
+        };
+
+        FilterPosts("all");
+    }
+
+    private void FilterPosts(string filter)
+    {
+        currentFilter = filter;
+        filteredPosts = filter switch
+        {
+            "published" => myPosts?.Where(p => p.Status == "published").ToList(),
+            "pending" => myPosts?.Where(p => p.Status == "pending").ToList(),
+            "draft" => myPosts?.Where(p => p.Status == "draft").ToList(),
+            _ => myPosts
+        };
+        StateHasChanged();
+    }
+
+    private void CreateNewPost()
+    {
+        Navigation.NavigateTo("/create-post");
+    }
+
+    private void EditPost(int postId)
+    {
+        Navigation.NavigateTo($"/edit-post/{postId}");
+    }
+
+    private void DeletePost(int postId)
+    {
+        // Implement delete logic
+        Console.WriteLine($"Delete post {postId}");
+    }
+
+    private void ViewPost(int postId)
+    {
+        Navigation.NavigateTo($"/viewblogconstruct/{postId}");
+    }
+
+    private string GetEmptyMessage()
+    {
+        return currentFilter switch
+        {
+            "published" => "You don't have any published posts yet.",
+            "pending" => "No posts waiting for approval.",
+            "draft" => "You don't have any drafts.",
+            _ => "Start creating amazing content today!"
+        };
+    }
+}
