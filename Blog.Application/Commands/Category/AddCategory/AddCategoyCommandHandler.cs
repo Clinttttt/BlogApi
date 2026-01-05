@@ -27,7 +27,8 @@ namespace BlogApi.Application.Commands.Category
                 {
                     Name = request.Name,
                     Slug = slughelper,
-                    UserId = request.UserId
+                    UserId = request.UserId,
+                    CreatedAt = DateTime.UtcNow.AddHours(8)
                 };
                 context.Categories.Add(categ);
             }

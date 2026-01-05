@@ -100,10 +100,6 @@ namespace BlogApi.Infrastructure.Respository
 
 
 
-
-
-
-
         public async Task<List<Post>> GetNonPaginatedPostAsync(Expression<Func<Post, bool>>? filter = null, CancellationToken cancellationToken = default)
         {
             IQueryable<Post> query = context.Posts.AsNoTracking();

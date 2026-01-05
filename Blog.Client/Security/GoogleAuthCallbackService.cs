@@ -37,10 +37,10 @@ namespace BlogApi.Client.Services
                     var accessToken = result.Value.AccessToken!.Trim().Trim('"').Trim();
                     var refreshToken = result.Value.RefreshToken!.Trim().Trim('"').Trim();
 
-                    // Cache token in memory
+                    // Legacy call (NO-OP): token is stored via HttpOnly cookies
                     _tokenCache.CacheToken(accessToken);
 
-                    // Redirect to middleware endpoint to set cookies
+                  
                     var encodedAccessToken = Uri.EscapeDataString(accessToken);
                     var encodedRefreshToken = Uri.EscapeDataString(refreshToken);
 
@@ -66,7 +66,7 @@ namespace BlogApi.Client.Services
             {
                 _tokenCache.ClearCache();
 
-                // Redirect to middleware endpoint to clear cookies
+                
                 _navigation.NavigateTo("/_auth/clearcookie", forceLoad: true);
             }
             catch (Exception ex)

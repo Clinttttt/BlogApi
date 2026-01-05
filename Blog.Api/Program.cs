@@ -13,6 +13,7 @@ builder.Services.AddMediatR(configuration =>
 {
     configuration.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
 });
+builder.Services.AddMemoryCache();
 builder.ConfigureServices();
 builder.Services.AddAutoMapper(cfg =>
 {
@@ -21,7 +22,7 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular", policy =>
+    options.AddPolicy("AllowBlazor", policy =>
     {
         policy.WithOrigins("http://localhost:5019", "https://localhost:7147")
               .AllowAnyMethod()
@@ -89,7 +90,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAngular");
+app.UseCors("AllowBlazor");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

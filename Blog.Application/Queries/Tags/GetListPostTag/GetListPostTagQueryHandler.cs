@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static BlogApi.Domain.Enums.EntityEnum;
 
 namespace BlogApi.Application.Queries.Tags.GetListPostTag
 {
@@ -15,7 +16,7 @@ namespace BlogApi.Application.Queries.Tags.GetListPostTag
         public async Task<Result<List<TagDto>>> Handle(GetListPostTagQuery request, CancellationToken cancellationToken)
         {
             var tag = await respository.GetListing(
-                filter: c => c.PostTags.Any(s => s.TagId == c.Id), cancellationToken);
+                filter: c => c.PostTags.Any(s => s.TagId == c.Id  && s.post!.Status == Status.Published), cancellationToken);
 
             if (!tag.Any())
                 return Result<List<TagDto>>.NoContent();
@@ -23,8 +24,10 @@ namespace BlogApi.Application.Queries.Tags.GetListPostTag
             var filter = tag.Select(s => new TagDto
             {
                 Id = s.Id,
-                Name = s.Name
-            }).ToList();
+                Name = s.Name,
+                TagCount = s.PostTags.Count(),
+            }).OrderByDescending(s=> s.TagCount)
+              .ToList();
 
             return Result<List<TagDto>>.Success(filter);
         }

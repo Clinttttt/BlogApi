@@ -87,9 +87,9 @@
                 {
                     foreach (var tag in tags.Take(5))
                     {
-                        <span class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
+                        <NavLink href="@($"tag/{tag.Id}")" class="bg-gray-200 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer hover:bg-gray-300 hover:-translate-y-0.5 transition-all">
                             @tag.Name
-                        </span>
+                        </NavLink>
                     }
                 }
                 else

@@ -13,6 +13,7 @@ namespace BlogApi.Domain.Entities
         public int Id { get; set; }
         public Guid UserId { get; set; }
         public int? PostId { get; set; }
+        public DateTime CreatedAt { get; set; }
         public Post Post { get; set; } = null!;
   
     }

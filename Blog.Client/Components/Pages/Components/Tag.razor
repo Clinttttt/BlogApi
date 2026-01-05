@@ -1,0 +1,143 @@
+﻿@page "/tag/{TagId:int}"
+
+
+<div class="p-5 h-screen overflow-auto">
+    @if (!hasrender)
+    {
+
+        <div class="skeleton h-7 w-48 mb-6"></div>
+    }
+    else
+    {
+        <h2 class="text-lg font-bold mb-6 text-gray-700">@PostDtos?.Items?.FirstOrDefault()?.CategoryName</h2>
+    }
+
+    <section class="pt-5 border-t border-gray-300">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            @if (!hasrender)
+            {
+
+                @for (int i = 0; i < 6; i++)
+                {
+                    <article class="bg-white rounded-2xl p-6 border border-gray-200">
+
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="skeleton h-6 w-20 rounded-md"></div>
+                            <div class="skeleton h-10 w-10 rounded-lg"></div>
+                        </div>
+
+
+                        <div class="skeleton h-6 w-full mb-2"></div>
+                        <div class="skeleton h-6 w-3/4 mb-3"></div>
+
+
+                        <div class="skeleton h-4 w-full mb-2"></div>
+                        <div class="skeleton h-4 w-full mb-2"></div>
+                        <div class="skeleton h-4 w-2/3 mb-4"></div>
+
+
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                            <div class="skeleton h-4 w-20"></div>
+                            <div class="skeleton h-4 w-24"></div>
+                        </div>
+                    </article>
+                }
+            }
+            else if (PostDtos != null && PostDtos.Items.Any())
+            {
+                foreach (var post in PostDtos.Items)
+                {
+                    <article class="bg-white rounded-2xl p-6 border border-gray-200 hover:-translate-y-1 hover:shadow-xl hover:border-indigo-600 transition-all cursor-pointer group">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-md text-xs font-semibold uppercase">@post.CategoryName</span>
+                            <button @onclick="() => HandleBookMark(post.Id)"
+                                    class="p-2 cursor-pointer rounded-lg transition-all @(post.IsBookMark ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">
+                                <svg class="w-5 h-5 @(post.IsBookMark ? "fill-current" : "")" fill="@(post.IsBookMark ? "currentColor" : "none")" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-700 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                            @post.Title
+                        </h3>
+                        <div class="prose prose-sm max-w-none line-clamp-3 mb-4 text-gray-600 [&_*]:!text-sm">
+                            @((MarkupString)post.Content!)
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                            <span class="text-sm text-gray-600 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                @post.readingDuration.GetDisplayName()
+                            </span>
+                            <NavLink href="@($"viewblogconstruct/{post.Id}")" class="text-indigo-600 font-semibold text-sm hover:underline flex items-center gap-1 group-hover:gap-2 transition-all">
+                                Read more
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </NavLink>
+                        </div>
+                    </article>
+                }
+            }
+            else
+            {
+
+                <div class="col-span-full flex flex-col items-center justify-center py-16">
+                    <div class="bg-indigo-50 p-6 rounded-full mb-6">
+                        <svg class="w-16 h-16 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">No Posts in This Category</h3>
+                    <p class="text-gray-500 text-center max-w-md mb-6">
+                        There are currently no posts in this category. Check back later for new content!
+                    </p>
+                    <NavLink href="/admin_home" class="btn bg-indigo-500 text-white hover:bg-indigo-600 gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Home
+                    </NavLink>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+
+
+
+@code {
+
+    [Parameter]
+    public int TagId { get; set; }
+
+
+    private bool hasrender = false;
+    private PagedResult<PostDto>? PostDtos { get; set; }
+    public ListPaginatedRequest Pagination { get; set; } = new ListPaginatedRequest();
+    private AddBookMarkRequest addBookMarkRequest { get; set; } = new AddBookMarkRequest();
+    protected override async Task OnParametersSetAsync()
+    {
+        hasrender = false;
+        StateHasChanged();
+
+        var request = await PostClient.ListByTag(TagId,Pagination);
+        PostDtos = request.Value;
+        hasrender = true;
+        StateHasChanged();
+    }
+
+    public async Task HandleBookMark(int? PostId)
+    {
+        addBookMarkRequest.PostId = PostId;
+        await PostClient.AddBookMark(addBookMarkRequest);
+
+       
+        var request = await PostClient.ListByCategory(TagId, Pagination);
+        PostDtos = request.Value;
+        StateHasChanged();
+    }
+}
+

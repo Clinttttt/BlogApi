@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace BlogApi.Client.Security
+namespace Blog.Client.Security
 {
     public class RefreshTokenDelegatingHandler : DelegatingHandler
     {

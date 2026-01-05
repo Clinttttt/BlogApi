@@ -1,4 +1,7 @@
 ﻿@page "/profile"
+@using Application.Queries;
+@using Application.Queries.GetRecentActivity
+
 @attribute [Authorize(Roles = "Admin")]
 
 <main class="p-6 lg:p-12 max-w-7xl w-full mx-auto h-screen overflow-auto pb-15 bg-gray-50">
@@ -104,7 +107,7 @@
 
     @if (Stats is null || !hasrender)
     {
-        <!-- Loading Skeletons -->
+      
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             @for (int i = 0; i < 4; i++)
             {
@@ -118,11 +121,274 @@
     }
     else
     {
-     
-     
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-start">
 
            
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Recent Activity
+                    </h2>
+                    <a href="/posts" class="text-sm text-indigo-600 hover:text-indigo-700 font-semibold">View All →</a>
+                </div>
+
+                <div class="space-y-4">
+
+                    @if (RecentActivities is null)
+                    {
+                        <h1>no post</h1>
+                    }
+                    else if (!RecentActivities.Any())
+                    {
+                        <h1>loadding post</h1>
+                    }
+                    else
+                    {
+                        foreach (var recent in RecentActivities.Take(4))
+                        {
+                            <div class="flex gap-4 items-start p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+                                <div class="bg-indigo-100 text-indigo-600 p-2 rounded-lg">
+                                    @if (recent.Icon == "plus")
+                                    {
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    }
+                                    else if (recent.Icon == "tag")
+                                    {
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                    } 
+                                    else if (recent.Icon == "bookmark")
+                                    {
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    }
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-800">@recent.Type</p>
+                                    <p class="text-sm text-gray-600 mt-1">@recent.Title</p>
+                                    <p class="text-xs text-gray-400 mt-1">@recent.TimeAgo</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                                  
+                </div>
+            </div>
+
+         
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Top Categories
+                </h2>
+
+                <div class="space-y-3">
+                    @if(TopCategory is null)
+                    {
+                        <h1>no post</h1>
+                    }
+                    else if (!TopCategory.Any())
+                    {
+                        <h1>loadding post</h1>
+                    }
+                    else
+                    {
+                        foreach (var category in TopCategory.Take(6))
+                        {
+
+                            <NavLink href="@($"category/{category.Id}")" class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <div class="font-semibold text-gray-800 group-hover:text-indigo-600">@category.Name</div>                                
+                                    </div>
+                                </div>
+                                <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">@category.CategoryCount</span>
+                            </NavLink>
+                        }
+                    }
+
+                      
+                </div>
+
+                <button class="w-full mt-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-sm text-gray-700 transition-colors border border-gray-200">
+                    View All Categories
+                </button>
+            </div>
+        </div>
+
+   
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                Popular Topics
+            </h2>
+
+            <div class="flex flex-wrap gap-2">
+                @if (TopTag is null)
+                {
+                    <h1>no post</h1>
+                }
+                else if (!TopTag.Any())
+                {
+                    <h1>loadding post</h1>
+                }
+                else
+                {
+                    foreach (var tag in TopTag.Take(14))
+                    {
+
+                        <NavLink href="@($"tag/{tag.Id}")" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
+                            #@tag.Name <span class="text-xs opacity-75">(@tag.TagCount)</span>
+                        </NavLink>
+                    }
+                }
+            </div>
+        </div>
+
+      
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white text-center shadow-xl">
+            <h2 class="text-2xl font-bold mb-4">Ready to Share Your Knowledge?</h2>
+            <p class="text-white/90 mb-6 max-w-2xl mx-auto">Create engaging content about .NET, Blazor, and Modern Web Development to help developers worldwide.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="/posts/new" class="bg-white text-indigo-600 px-8 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create New Post
+                </a>
+                <a href="/posts/drafts" class="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-xl font-semibold transition-all backdrop-blur-sm flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    View Drafts
+                </a>
+            </div>
+        </div>
+    }
+</main>
+
+@code {
+    private bool hasrender = false;
+    private StatisticsDto? Stats { get; set; } = new StatisticsDto();
+    private UserInfoDto UserInfo { get; set; } = new UserInfoDto();
+    private UserInfoRequest UpdateInfo { get; set; } = new UserInfoRequest();
+    private List<RecentActivityItemDto>? RecentActivities { get; set; } = new List<RecentActivityItemDto>();
+    private List<CategoryDto>? TopCategory { get; set; } = new List<CategoryDto>();
+    private List<TagDto>? TopTag { get; set; } = new List<TagDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetStatistics();
+        await GetRecentActivity();
+        await GetTopCategories();
+        await GetTopTag();
+        var userinfo = await UserClient.GetUserInfo();
+        if (userinfo.Value is not null)
+            UserInfo = userinfo.Value;
+
+        hasrender = true;
+    }
+
+    public async Task GetTopCategories()
+    {
+        var request = await CategoryClient.GetListPostCategory();
+        TopCategory = request.Value;
+    }
+    public async Task GetTopTag()
+    {
+        var request = await TagClient.GetListingPostTag();
+        TopTag = request.Value;
+    }
+
+    public async Task GetRecentActivity()
+    {
+        var recent = await PostClient.GetRecentActivity();
+        RecentActivities = recent.Value;
+        StateHasChanged();
+    }
+
+    public async Task GetStatistics()
+    {
+        var stats = await PostClient.GetStatistics();
+        if (stats?.StatusCode == 204)
+        {
+            Stats = null;
+        }
+        else
+        {
+            Stats = stats?.Value;
+        }
+    }
+
+    private async Task HandleUpdate()
+    {
+        await UserClient.UpdateUserInfo(UpdateInfo);
+        var userinfo = await UserClient.GetUserInfo();
+        if (userinfo.Value is not null)
+            UserInfo = userinfo.Value;
+        isEditMode = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleProfilePhotoSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            if (file.Size > 5 * 1024 * 1024)
+            {
+                return;
+            }
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            var buffer = ms.ToArray();
+
+            UpdateInfo.PhotoContentType = file.ContentType;
+            UpdateInfo.Photo = buffer;
+            var imageData = $"data:{UpdateInfo.PhotoContentType};base64,{Convert.ToBase64String(UpdateInfo.Photo)}";
+            UserInfo.ProfilePhoto = imageData;
+            StateHasChanged();
+        }
+    }
+
+    private bool isEditMode = false;
+    private void ToggleEditMode()
+    {
+        isEditMode = !isEditMode;
+    }
+
+    private void SaveChanges()
+    {
+        isEditMode = false;
+    }
+
+    private void CancelEdit()
+    {
+        isEditMode = false;
+    }
+
+
+
+}
+
+@*
             <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -187,199 +453,4 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-         
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    Top Categories
-                </h2>
-
-                <div class="space-y-3">
-                    <a href="/category/cqrs" class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all group">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-800 group-hover:text-indigo-600">CQRS</div>
-                                <div class="text-xs text-gray-500">Command Query Pattern</div>
-                            </div>
-                        </div>
-                        <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">12</span>
-                    </a>
-
-                    <a href="/category/news" class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all group">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-800 group-hover:text-indigo-600">News</div>
-                                <div class="text-xs text-gray-500">Latest Updates</div>
-                            </div>
-                        </div>
-                        <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">8</span>
-                    </a>
-
-                    <a href="/category/rubymine" class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all group">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-800 group-hover:text-indigo-600">RubyMine</div>
-                                <div class="text-xs text-gray-500">IDE Tips & Tricks</div>
-                            </div>
-                        </div>
-                        <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">5</span>
-                    </a>
-
-                    <a href="/category/blazor" class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all group">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-800 group-hover:text-indigo-600">Blazor</div>
-                                <div class="text-xs text-gray-500">Web Development</div>
-                            </div>
-                        </div>
-                        <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">7</span>
-                    </a>
-                </div>
-
-                <button class="w-full mt-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-sm text-gray-700 transition-colors border border-gray-200">
-                    View All Categories
-                </button>
-            </div>
-        </div>
-
-   
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                Popular Topics
-            </h2>
-
-            <div class="flex flex-wrap gap-2">
-                <a href="/tag/cqrs" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #cqrs <span class="text-xs opacity-75">(24)</span>
-                </a>
-                <a href="/tag/mediatr" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #mediatr <span class="text-xs opacity-75">(18)</span>
-                </a>
-                <a href="/tag/net-core" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #net-core <span class="text-xs opacity-75">(32)</span>
-                </a>
-                <a href="/tag/blazor" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #blazor <span class="text-xs opacity-75">(15)</span>
-                </a>
-                <a href="/tag/aspnet" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #aspnet <span class="text-xs opacity-75">(28)</span>
-                </a>
-                <a href="/tag/ef-core" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #ef-core <span class="text-xs opacity-75">(12)</span>
-                </a>
-                <a href="/tag/teamcity" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #teamcity <span class="text-xs opacity-75">(9)</span>
-                </a>
-                <a href="/tag/ci-cd" class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200">
-                    #ci-cd <span class="text-xs opacity-75">(11)</span>
-                </a>
-            </div>
-        </div>
-
-      
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white text-center shadow-xl">
-            <h2 class="text-2xl font-bold mb-4">Ready to Share Your Knowledge?</h2>
-            <p class="text-white/90 mb-6 max-w-2xl mx-auto">Create engaging content about .NET, Blazor, and Modern Web Development to help developers worldwide.</p>
-            <div class="flex flex-wrap gap-4 justify-center">
-                <a href="/posts/new" class="bg-white text-indigo-600 px-8 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Create New Post
-                </a>
-                <a href="/posts/drafts" class="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-xl font-semibold transition-all backdrop-blur-sm flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    View Drafts
-                </a>
-            </div>
-        </div>
-    }
-</main>
-
-@code {
-    private bool hasrender = false;
-    private StatisticsDto? Stats { get; set; } = new StatisticsDto();
-    private UserInfoDto UserInfo { get; set; } = new UserInfoDto();
-    private UserInfoRequest UpdateInfo { get; set; } = new UserInfoRequest();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetStatistics();
-        var userinfo = await UserClient.GetUserInfo();
-        if (userinfo.Value is not null)
-            UserInfo = userinfo.Value;
-        hasrender = true;
-    }
-
-    private async Task HandleUpdate()
-    {
-        await UserClient.UpdateUserInfo(UpdateInfo);
-        var userinfo = await UserClient.GetUserInfo();
-        if (userinfo.Value is not null)
-            UserInfo = userinfo.Value;
-        isEditMode = false;
-        StateHasChanged();
-    }
-
-    private async Task HandleProfilePhotoSelected(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-
-        if (file != null)
-        {
-            if (file.Size > 5 * 1024 * 1024)
-            {
-                return;
-            }
-            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-
-            var buffer = ms.ToArray();
-
-            UpdateInfo.PhotoContentType = file.ContentType;
-            UpdateInfo.Photo = buffer;
-            var imageData = $"data:{UpdateInfo.PhotoContentType};base64,{Convert.ToBase64String(UpdateInfo.Photo)}";
-            UserInfo.ProfilePhoto = imageData;
-            StateHasChanged();
-        }
-    }
-
-    public async Task GetStatistics()
-    {
-        var stats = await PostClient.GetStatistics();
-        if (stats?.StatusCode == 204)
-        {
-            Stats = null;
-        }
-        else
-        {
-            Stats = stats?.Value;
-        }
-    }
-
-    private bool isEditMode = false;
-    private void ToggleEditMode()
-    {
-        isEditMode = !isEditMode;
-    }
-
-    private void SaveChanges()
-    {
-        isEditMode = false;
-    }
-
-    private void CancelEdit()
-    {
-        isEditMode = false;
-    }
-}
+            </div>*@

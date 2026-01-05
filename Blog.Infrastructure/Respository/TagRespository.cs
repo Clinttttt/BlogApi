@@ -23,6 +23,7 @@ namespace BlogApi.Infrastructure.Respository
 
             return await query
                 .Include(s=> s.PostTags)
+                .ThenInclude(s=> s.post)
                 .ToListAsync(cancellationToken);
           
         }

@@ -1,4 +1,6 @@
 ﻿
+using Blog.Application.Abstractions;
+using Blog.Application.Common.Interfaces;
 using BlogApi.Application.Common.Interfaces;
 using BlogApi.Domain.Interfaces;
 using BlogApi.Infrastructure.Persistence;
@@ -33,6 +35,7 @@ namespace BlogApi.Infrastructure
             services.AddScoped<IUserRespository, UserRespository>();
             services.AddScoped<ITagRespository, TagRespository>();
             services.AddScoped<ICategoryRespository, CategoryRespository>();
+            services.AddScoped<IPostFilterBuilder, PostFilterBuilder>();
             return services;
         }
     }

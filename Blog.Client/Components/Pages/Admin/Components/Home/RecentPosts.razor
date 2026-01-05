@@ -42,7 +42,7 @@
         }
         else
         {
-            foreach (var post in recentPost.Items)
+            foreach (var post in recentPost.Items.Take(6))
             {
                 <article class="bg-white rounded-xl p-6 border border-gray-200 hover:-translate-y-1 hover:shadow-xl hover:border-indigo-500 transition-all cursor-pointer group">
                     <div class="flex justify-between items-center mb-4">

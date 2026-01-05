@@ -1,8 +1,11 @@
-﻿using BlogApi.Api.Shared;
+﻿using Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.GetRecentActivity;
+using BlogApi.Api.Shared;
 using BlogApi.Application.Commands.Posts.ApprovePost;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 using BlogApi.Application.Queries.BookMark.GetAllBookMark;
+using BlogApi.Application.Queries.Posts; 
 using BlogApi.Application.Queries.Posts.GetFeatured;
 using BlogApi.Application.Queries.Posts.GetPublicStatistics;
 using BlogApi.Application.Queries.Posts.GetStatistics;
@@ -11,7 +14,6 @@ using BlogApi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BlogApi.Application.Queries.Posts; 
 
 namespace BlogApi.Api.Controllers
 {
@@ -261,6 +263,19 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
+        [HttpGet("GetRecentActivity")]
+        public async Task<ActionResult<List<RecentActivityItemDto>>> GetRecentActivity([FromQuery] int limit = 4, [FromQuery] int daysBack = 7)
+        {
+            var query = new RecentActivityQuery
+            {
+                Limit = limit,
+                DaysBack = daysBack
+            };
+            var result = await Sender.Send(query);
+            return Ok(result.Value);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("ApprovePost")]
         public async Task<ActionResult<bool>> ApprovePost([FromQuery] ApprovePostCommand command)
         {
@@ -270,8 +285,5 @@ namespace BlogApi.Api.Controllers
     }
 }
 
-// ============================================
-// UPDATE YOUR ListPaginatedRequest TO SUPPORT PAGINATION
-// ============================================
-// Add this to your Request models file if PageNumber/PageSize aren't there yet
+
 

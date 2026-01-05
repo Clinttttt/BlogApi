@@ -1,4 +1,6 @@
-﻿using BlogApi.Application.Dtos;
+﻿using Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.GetRecentActivity;
+using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 using BlogApi.Application.Request.Posts;
 using BlogApi.Client.Helper;
@@ -71,6 +73,9 @@ namespace BlogApi.Client.Services
 
         public async Task<Result<bool>> ToggleLikeComment(ToggleCommentLikeRequest dto)
             => await PostAsync<ToggleCommentLikeRequest, bool>("api/Posts/ToggleLikeComment", dto);
+
+        public async Task<Result<List<RecentActivityItemDto>>> GetRecentActivity(int limit = 5, int daysBack = 7)
+            => await GetAsync<List<RecentActivityItemDto>>($"api/Posts/GetRecentActivity?limit={limit}&daysBack={daysBack}");
 
         public async Task<Result<StatisticsDto>> GetPublicStatistics()
             => await GetAsync<StatisticsDto>("api/Posts/GetPublicStatistics");

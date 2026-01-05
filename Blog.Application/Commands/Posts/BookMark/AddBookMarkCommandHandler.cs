@@ -21,6 +21,7 @@ namespace BlogApi.Application.Commands.Posts.BookMark
                 context.BookMarks.Add( new Domain.Entities.BookMark
                 {
                     PostId = request.PostId,
+                    CreatedAt = DateTime.UtcNow.AddHours(8),
                     UserId = request.UserId
                 });
             }

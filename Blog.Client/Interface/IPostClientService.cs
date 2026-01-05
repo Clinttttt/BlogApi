@@ -1,4 +1,6 @@
-﻿using BlogApi.Application.Dtos;
+﻿using Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.GetRecentActivity;
+using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 
 using BlogApi.Application.Request.Posts;
@@ -36,7 +38,7 @@ namespace BlogApi.Client.Interface
         Task<Result<bool>> ToggleLikeComment(ToggleCommentLikeRequest dto);
 
 
-
+        Task<Result<List<RecentActivityItemDto>>> GetRecentActivity(int limit = 4, int daysBack = 7);
         Task<Result<StatisticsDto>> GetPublicStatistics();
         Task<Result<StatisticsDto>> GetStatistics();
     }
