@@ -112,10 +112,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var feaatured = await PostClient.ListFeatured();
-        featuredPosts = feaatured.Value;
-        var recent = await PostClient.ListPublished(Pagination);
-        recentPost = recent.Value;
+        await ListFeatured();
+        await ListPublished();
     }
     public async Task RefreshAsync()
     {
@@ -123,5 +121,16 @@
         recentPost = recent.Value;
         StateHasChanged();
     }
-   
+
+    private async Task ListFeatured()
+    {
+        var feaatured = await PostClient.ListFeatured();
+        featuredPosts = feaatured.Value;
+    }
+
+    private async Task ListPublished()
+    {
+        var recent = await PostClient.ListPublished(Pagination);
+        recentPost = recent.Value;
+    }
 }

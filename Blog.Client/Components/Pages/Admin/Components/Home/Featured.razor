@@ -1,4 +1,7 @@
-﻿@if (featuredPosts is null)
+﻿@using BlogApi.Application.Dtos
+@inject IJSRuntime JS
+
+@if (featuredPosts is null)
 {
     <div class="col-span-full text-center py-12">
         <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +48,6 @@ else
             </button>
         }
 
-
         <div @ref="carouselContainer" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory hide-scrollbar pb-2">
             @foreach (var featuredPost in featuredPosts)
             {
@@ -61,35 +63,25 @@ else
                     </p>
                     <div class="flex flex-wrap gap-6 mb-8 text-sm opacity-90">
                         <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
                             @featuredPost.CreatedAt.ToString("MMMM dd, yyyy")
                         </span>
                         <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
                             @featuredPost.ReadingDuration.GetDisplayName()
                         </span>
                         <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            3 views
+                            @featuredPost.ViewCount views
                         </span>
                     </div>
-                    <NavLink href="@($"viewblogconstruct/{featuredPost.PostId}")" class="inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold text-base hover:-translate-y-0.5 hover:shadow-lg transition-all">
+                    <button @onclick="() => ReadMore.InvokeAsync(featuredPost.PostId)"
+                            class="btn inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold text-base hover:-translate-y-0.5 hover:shadow-lg transition-all">
                         Read Article
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </NavLink>
+                    </button>
                 </section>
             }
         </div>
-
 
         @if (featuredPosts.Count > 1)
         {
@@ -106,16 +98,16 @@ else
     </div>
 }
 
-
-
 @code {
-
-
     private ElementReference carouselContainer;
     private int currentSlide = 0;
 
     [Parameter]
-    public List<FeaturedPostDto>? featuredPosts { get; set; } = new List<FeaturedPostDto>();
+    public List<FeaturedPostDto>? featuredPosts { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> ReadMore { get; set; }
+
     private async Task ScrollLeft()
     {
         await JS.InvokeVoidAsync("eval", $"document.querySelector('.hide-scrollbar').scrollBy({{ left: -window.innerWidth, behavior: 'smooth' }})");

@@ -1,4 +1,5 @@
 ﻿using BlogApi.Application.Common.Interfaces;
+using BlogApi.Application.Dtos;
 using BlogApi.Domain.Entities;
 using BlogApi.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +22,24 @@ namespace BlogApi.Infrastructure.Respository
                 user = user.Where(filter);
 
             return await user
+                .AsNoTracking()
                 .Include(s=> s.Posts)
                 .ToListAsync();
         }
+        public async Task<User> Get(Expression<Func<User,bool>> filter, CancellationToken cancellationToken = default)
+        {
+             IQueryable<User>user = context.Users.AsNoTracking();
+
+            if (filter != null)
+                user = user.Where(filter);
+
+            return await user
+                .AsNoTracking()
+                .Include(s => s.Posts)
+                .Include(s=> s.UserInfo)
+                .Include(s=> s.ExternalLogins)
+                .FirstOrDefaultAsync();
+        }
+        
     }
 }

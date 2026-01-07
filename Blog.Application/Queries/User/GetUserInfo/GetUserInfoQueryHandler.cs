@@ -1,4 +1,5 @@
-﻿using BlogApi.Application.Dtos;
+﻿using BlogApi.Application.Common.Interfaces;
+using BlogApi.Application.Dtos;
 using BlogApi.Domain.Common;
 using BlogApi.Domain.Interfaces;
 using MediatR;
@@ -12,31 +13,28 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Queries.User.GetUserInfo
 {
-    public class GetUserInfoQueryHandler(IAppDbContext context) : IRequestHandler<GetUserInfoQuery, Result<UserInfoDto>>
+    public class GetUserInfoQueryHandler(IUserRespository respository) : IRequestHandler<GetUserInfoQuery, Result<UserInfoDto>>
     {
         public async Task<Result<UserInfoDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
         {
-            var user = await context.Users
-                .Include(s => s.ExternalLogins)
-                .Include(s => s.UserInfo)
-                .AsNoTracking()
-                .Where(s => s.Id == request.UserId)
-                .Select(s => new UserInfoDto
-                {
-                    FullName = s.UserInfo != null ? s.UserInfo.FullName : s.UserName,
 
-                    ProfilePhoto = s.UserInfo != null && s.UserInfo.Photo != null && s.UserInfo.Photo.Length > 0
-                    ? $"data:{s.UserInfo.PhotoContentType};base64,{Convert.ToBase64String(s.UserInfo.Photo)}"
-                    : s.ExternalLogins.Select(x => x.ProfilePhotoUrl).FirstOrDefault(),
+            var user = await respository.Get(filter: s => s.Id == request.UserId, cancellationToken);
 
-                    Bio = s.UserInfo != null ? s.UserInfo.Bio : "Add a short bio",
-                    CreatedAt = s.ExternalLogins.Select(s => s.LinkedAt).FirstOrDefault(),
-
-                }).FirstOrDefaultAsync();
-            if (user is null)
+            var dto = new UserInfoDto
+            {
+                FullName = user.UserInfo != null ? user.UserInfo.FullName : user.UserName,
+                ProfilePhoto = user.UserInfo != null && user.UserInfo.Photo != null && user.UserInfo.Photo.Length > 0
+                    ? $"data:{user.UserInfo.PhotoContentType};base64,{Convert.ToBase64String(user.UserInfo.Photo)}"
+                    : user.ExternalLogins.Select(x => x.ProfilePhotoUrl).FirstOrDefault(),
+                Bio = user.UserInfo != null ? user.UserInfo.Bio : "Add a short bio",
+                CreatedAt = user.ExternalLogins.Select(s => s.LinkedAt).FirstOrDefault(),
+            };
+          
+            if (dto is null)
                 return Result<UserInfoDto>.NoContent();
-            return Result<UserInfoDto>.Success(user);
+            return Result<UserInfoDto>.Success(dto);
 
         }
     }
 }
+                   

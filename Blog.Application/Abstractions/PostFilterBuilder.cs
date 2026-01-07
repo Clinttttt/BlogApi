@@ -41,6 +41,9 @@ namespace Blog.Application.Abstractions
                 PostFilterType.ByTag =>
                     p => p.PostTags.Any(pt => pt.TagId == request.TagId),
 
+                PostFilterType.BookMark =>
+                   p => p.BookMarks.Any(s => s.UserId == request.UserId),
+
                 _ => null
             };
         }

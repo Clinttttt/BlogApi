@@ -1,10 +1,11 @@
 ﻿using Application.Queries.GetRecentActivity;
+using Azure.Core;
+using Blog.Application.Commands.Posts.TrackPostView;
 using Blog.Application.Queries.GetRecentActivity;
 using BlogApi.Api.Shared;
 using BlogApi.Application.Commands.Posts.ApprovePost;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
-using BlogApi.Application.Queries.BookMark.GetAllBookMark;
 using BlogApi.Application.Queries.Posts; 
 using BlogApi.Application.Queries.Posts.GetFeatured;
 using BlogApi.Application.Queries.Posts.GetPublicStatistics;
@@ -183,9 +184,15 @@ namespace BlogApi.Api.Controllers
 
         [Authorize(Roles = "Admin,Author")]
         [HttpGet("ListBookMark")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListBookMark()
+        public async Task<ActionResult<PagedResult<PostDto>>> ListBookMark([FromQuery] ListPaginatedRequest request)
         {
-            var query = new GetListQuery(UserIdOrNull);
+            var query = new GetPagedPostsQuery
+            {
+                UserId = UserIdOrNull,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                FilterType = PostFilterType.BookMark,         
+            };           
             var result = await Sender.Send(query);
             return HandleResponse(result);
         }
@@ -217,6 +224,11 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
+
+
+
+
+
         [Authorize(Roles = "Admin,Author")]
         [HttpPost("AddComment")]
         public async Task<ActionResult<int>> AddComment([FromBody] AddCommentRequest request)
@@ -240,6 +252,15 @@ namespace BlogApi.Api.Controllers
         public async Task<ActionResult<bool>> ToggleLikeComment([FromBody] ToggleCommentLikeRequest request)
         {
             var command = request.ToCommand(UserId);
+            var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("TrackPostView")]
+        public async Task<ActionResult<bool>> TrackPostView([FromQuery] int PostId)
+        {
+            var command = new TrackPostViewCommand(UserIdOrNull, PostId);
             var result = await Sender.Send(command);
             return HandleResponse(result);
         }

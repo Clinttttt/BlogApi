@@ -1,4 +1,5 @@
-﻿using BlogApi.Domain.Entities;
+﻿using Blog.Domain.Entities;
+using BlogApi.Domain.Entities;
 using BlogApi.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -28,6 +29,7 @@ namespace BlogApi.Infrastructure.Persistence
         public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
         public DbSet<UserInfo> UserInfos { get; set; }
         public DbSet<Featured> Featureds { get; set; }
+        public DbSet<PostView> PostViews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

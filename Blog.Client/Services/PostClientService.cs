@@ -82,5 +82,7 @@ namespace BlogApi.Client.Services
 
         public async Task<Result<StatisticsDto>> GetStatistics()
             => await GetAsync<StatisticsDto>("api/Posts/GetStatistics");
+        public async Task<Result<bool>> TrackPostView(int? PostId)
+            => await PostAsync<bool>($"api/Posts/TrackPostView?PostId={PostId}");
     }
 }

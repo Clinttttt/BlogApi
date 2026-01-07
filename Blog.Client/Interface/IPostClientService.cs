@@ -41,5 +41,6 @@ namespace BlogApi.Client.Interface
         Task<Result<List<RecentActivityItemDto>>> GetRecentActivity(int limit = 4, int daysBack = 7);
         Task<Result<StatisticsDto>> GetPublicStatistics();
         Task<Result<StatisticsDto>> GetStatistics();
+        Task<Result<bool>> TrackPostView(int? PostId);
     }
 }

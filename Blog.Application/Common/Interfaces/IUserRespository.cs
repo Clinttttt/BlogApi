@@ -13,5 +13,8 @@ namespace BlogApi.Application.Common.Interfaces
         Task<List<User>> GetListing(
             Expression<Func<User, bool>> filter,
             CancellationToken cancellationToken = default);
+
+        Task<User> Get(Expression<Func<User, bool>> filter,
+            CancellationToken cancellationToken = default);
     }
 }

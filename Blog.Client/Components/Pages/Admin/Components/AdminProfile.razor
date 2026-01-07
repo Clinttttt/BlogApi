@@ -296,13 +296,15 @@
         await GetRecentActivity();
         await GetTopCategories();
         await GetTopTag();
+        await GetUserInfo();
+        hasrender = true;
+    }
+    public async Task GetUserInfo()
+    {
         var userinfo = await UserClient.GetUserInfo();
         if (userinfo.Value is not null)
             UserInfo = userinfo.Value;
-
-        hasrender = true;
     }
-
     public async Task GetTopCategories()
     {
         var request = await CategoryClient.GetListPostCategory();

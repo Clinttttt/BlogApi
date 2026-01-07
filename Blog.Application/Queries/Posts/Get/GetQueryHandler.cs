@@ -26,7 +26,7 @@ namespace BlogApi.Application.Queries.Posts.GetPostWithComments
 
             var filter = new PostDetailDto
             {
-
+                PostId = post.Id,
                 IsBookMark = post.BookMarks.Any(s => s.UserId == request.UserId),
                 PostLike = post.PostLikes.Count(),
                 Title = post.Title,
@@ -36,6 +36,7 @@ namespace BlogApi.Application.Queries.Posts.GetPostWithComments
                 PostCreatedAt = post.CreatedAt,
                 CategoryName = post.Category.Name,
                 Photo = post.Photo,
+                ViewCount = post.ViewCount,
                 PhotoContent = post.PhotoContent,
                 Author = post.Author,
                 readingDuration = post.readingDuration,

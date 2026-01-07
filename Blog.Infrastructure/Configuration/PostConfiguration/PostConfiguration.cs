@@ -11,7 +11,7 @@ namespace BlogApi.Infrastructure.Configuration.PostConfiguration
 {
     public class PostConfiguration : IEntityTypeConfiguration<Post>
     {
-        //delete post it will also delete comment
+       
         public void Configure(EntityTypeBuilder<Post> builder)
         {
             builder.HasKey(s => s.Id);
@@ -31,6 +31,11 @@ namespace BlogApi.Infrastructure.Configuration.PostConfiguration
                 .WithMany(c => c.Posts)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(s => s.PostViews)
+                .WithOne(s => s.Post)
+                .HasForeignKey(s => s.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 

@@ -1,4 +1,8 @@
 using AutoMapper;
+
+using Blog.Application.Common.Interfaces;
+using Blog.Infrastructure.Hubs;
+using Blog.Infrastructure.Services;
 using BlogApi.Application;
 using BlogApi.Infrastructure;
 using CQRSMEDIATR.Api;
@@ -13,6 +17,8 @@ builder.Services.AddMediatR(configuration =>
 {
     configuration.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
 });
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IPostHubService, PostHubService>();
 builder.Services.AddMemoryCache();
 builder.ConfigureServices();
 builder.Services.AddAutoMapper(cfg =>
@@ -27,13 +33,15 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:5019", "https://localhost:7147")
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+              .SetPreflightMaxAge(TimeSpan.FromMinutes(10))
+              .AllowCredentials(); 
     });
 });
 
 builder.Configuration
        .AddJsonFile("appsettings.json", optional: false)
        .AddJsonFile("appsettings.Local.json", optional: true);
+
 
 
 builder.Services.AddControllers();
@@ -89,6 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapHub<PostHub>("/posthub");
 app.UseHttpsRedirection();
 app.UseCors("AllowBlazor");
 app.UseAuthentication();

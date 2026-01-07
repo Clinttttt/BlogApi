@@ -1,4 +1,5 @@
-﻿using BlogApi.Domain.Common;
+﻿using Blog.Application.Common.Interfaces;
+using BlogApi.Domain.Common;
 using BlogApi.Domain.Entities;
 using BlogApi.Domain.Interfaces;
 using MediatR;
@@ -10,19 +11,15 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Comment.AddComment
 {
-    public class AddCommentCommandHandler : IRequestHandler<AddCommentCommand, Result<int>>
+    public class AddCommentCommandHandler(IAppDbContext context, IPostHubService hubService) : IRequestHandler<AddCommentCommand, Result<int>>
     {
-        private readonly IAppDbContext _context;
-        public AddCommentCommandHandler(IAppDbContext context)
-        {
-            _context = context;
-        }
+      
 
         public async Task<Result<int>> Handle(AddCommentCommand request, CancellationToken cancellationToken)
         {
-                  
-           
-            var post  = await _context.Posts.FindAsync(request.PostId, cancellationToken);
+
+
+            var post = await context.Posts.FindAsync(request.PostId, cancellationToken);
             var comment = new BlogApi.Domain.Entities.Comment
             {
                 UserId = request.UserId,
@@ -30,9 +27,10 @@ namespace BlogApi.Application.Commands.Comment.AddComment
                 CreatedAt = DateTime.UtcNow.AddHours(8),
                 PostId = request.PostId,
             };
-
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
+            
+            context.Comments.Add(comment);
+            await context.SaveChangesAsync();
+            await hubService.BroadcastSentComment(request.PostId, request.Content);
             return Result<int>.Success(comment.Id);
         }
     }

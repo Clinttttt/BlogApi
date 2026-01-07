@@ -1,4 +1,5 @@
 ﻿using Blog.Client.Security;
+using Blog.Client.Services;
 using Blog.Client.State;
 using BlogApi.Client.Interface;
 using BlogApi.Client.Security;
@@ -16,6 +17,7 @@ namespace BlogApi.Client
             AddCustomAuthentication(services);
 
             services.AddScoped<PageState>();
+            services.AddScoped<SignalRService>();
             return services;
         }
 
@@ -23,7 +25,7 @@ namespace BlogApi.Client
         {
           
             services.AddHttpContextAccessor();         
-            services.AddScoped<TokenCacheService>();
+         
             services.AddScoped<GoogleAuthCallbackService>();
             services.AddScoped<AuthorizationDelegatingHandler>();
             services.AddScoped<RefreshTokenDelegatingHandler>();

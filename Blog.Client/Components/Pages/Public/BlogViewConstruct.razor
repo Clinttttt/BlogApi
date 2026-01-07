@@ -241,7 +241,7 @@
                                     <p class="text-gray-700 leading-relaxed">@comment.Content</p>
                                 </div>
                                 <div class="mt-2 flex items-center gap-4 text-sm">
-                                    <div @onclick="() => GetCommentId(comment.CommentId)" class="@(comment.IsLikedComment ? "text-indigo-600" : "text-gray-600") btn flex items-center gap-1  hover:text-indigo-600 transition-colors cursor-pointer">
+                                    <div @onclick="() => GetCommentId(comment.CommentId)" class="@(comment.IsLikedComment ? "text-indigo-600" : "text-gray-600")  flex items-center gap-1  hover:text-indigo-600 transition-colors cursor-pointer">
                                         <svg class="w-4 h-4 " fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                                         </svg>
@@ -301,36 +301,63 @@
     private TogglePostLikeRequest togglePostLikeRequest { get; set; } = new TogglePostLikeRequest();
     private bool islike { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool first)
+    protected override async Task OnInitializedAsync()
     {
-        if (!hasrender && first)
+
+        postRequest.PostId = PostId;
+        addBookMarkRequest.PostId = PostId;
+        togglePostLikeRequest.PostId = PostId;
+
+        var result = await PostClient.Get(postRequest);
+        PostDto = result.Value;
+
+        if (PostDto?.Photo is not null)
         {
-            hasrender = true;
-            postRequest.PostId = PostId;
-            addBookMarkRequest.PostId = PostId;
-            togglePostLikeRequest.PostId = PostId;
-
-            var result = await PostClient.Get(postRequest);
-            PostDto = result.Value;
-
-            if (PostDto?.Photo is not null)
-            {
-                Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
-            }
+            Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
         }
-        StateHasChanged();
+
+        await SignalR.InitializeAsync();
+
+        await Task.Delay(100);
+        SignalR.OnSentComment(async (postId, content) =>
+        {
+            Console.WriteLine($"[Blazor] SignalRrrrr State: {SignalR.ConnectionState}");
+            Console.WriteLine($"[Blazor] Watching PostId: {PostId}");
+
+            if (PostDto?.PostId == postId)
+            {
+              
+                var updatedResult = await PostClient.Get(postRequest);
+                PostDto = updatedResult.Value;
+                await InvokeAsync(StateHasChanged);
+              
+            }
+          
+        });
+
+        hasrender = true;
+
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        await SignalR.DisposeAsync();
+    }
+
+
 
     private async Task HandleSubmitComment()
     {
         addCommentRequest.PostId = PostId;
         var request_comment = await PostClient.AddComment(addCommentRequest);
+
+  
         var result = await PostClient.Get(postRequest);
         PostDto = result.Value;
+
         addCommentRequest = new AddCommentRequest();
         StateHasChanged();
     }
-
     public async Task GetCommentId(int commentId)
     {
         toggleCommentLikeRequest.CommentId = commentId;

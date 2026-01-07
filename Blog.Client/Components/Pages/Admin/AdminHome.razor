@@ -1,5 +1,8 @@
 ﻿@page "/admin_home"
 
+
+@using Microsoft.AspNetCore.SignalR.Client
+
 <main class="p-6 lg:p-8 max-w-7xl w-full overflow-auto h-screen ">
 
     <header class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6 pb-4 border-b border-gray-200">
@@ -8,7 +11,6 @@
             <p class="text-base text-gray-600">Sharing my journey through .NET, Blazor, and Modern Web Development</p>
         </div>
         <div class="flex gap-3 items-center">
-
             @if (!hasrender)
             {
                 <div class="skeleton w-10 h-10 rounded-full flex-shrink-0"></div>
@@ -51,7 +53,6 @@
     <div class="flex flex-col lg:flex-row gap-2 mb-6 justify-between">
 
         <div class="flex flex-row items-center gap-3 ">
-
             <div class="flex gap-2 flex-row">
                 <button @onclick="() => PageState.AdminView(PageState.AdminPostState.all_post)" class=" cursor-pointer px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 transition-all">
                     All Posts
@@ -105,7 +106,7 @@
 
     @if (PageState.AdminPageView == PageState.AdminPostState.home)
     {
-        <Featured featuredPosts="featuredPosts" />
+        <Featured featuredPosts="featuredPosts" ReadMore="HandleReadMore" />
         <RecentPosts recentPost="recentPost" />
     }
     else if (PageState.AdminPageView == PageState.AdminPostState.all_post)
@@ -130,7 +131,6 @@
     }
 </main>
 
-
 <style>
     .hide-scrollbar::-webkit-scrollbar {
         display: none;
@@ -142,7 +142,6 @@
     }
 </style>
 
-
 @code {
     public bool hasrender = false;
     private UserProfileDto? userProfile { get; set; } = new UserProfileDto();
@@ -151,50 +150,57 @@
     private PagedResult<PostDto>? ListForAdmin { get; set; } = new PagedResult<PostDto>();
     private PagedResult<PostDto>? ListDraftForAdmin { get; set; } = new PagedResult<PostDto>();
 
-  
     private ListPaginatedRequest Pagination { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
     private ListPaginatedRequest PaginationPublished { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
     private ListPaginatedRequest PaginationDraft { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
 
+    private HubConnection? _hubConnection;
+
     protected override async Task OnInitializedAsync()
     {
-       
-        var request = await ClientService.GetCurrentUser();
-        userProfile = request.Value;
-
-    
-        var featured = await PostClient.ListFeatured();
-        featuredPosts = featured.Value;
-
-      
+        await GetCurrentUser();
+        await ListFeatured();
         await LoadPublishedPostsAsync();
-
-      
         await LoadAdminPublishedPostsAsync();
-
-      
         await LoadAdminDraftPostsAsync();
+
+        await SignalR.InitializeAsync();
+        SignalR.OnViewCountUpdate((postId, viewCount) =>
+       {
+           var post = featuredPosts?.FirstOrDefault(p => p.PostId == postId);
+           if (post != null)
+           {
+               post.ViewCount = viewCount;
+               InvokeAsync(StateHasChanged);
+           }
+       });
 
         hasrender = true;
     }
 
- 
-    public async Task RefreshAsync()
+    public async ValueTask DisposeAsync()
     {
-        await LoadPublishedPostsAsync();
+        await SignalR.DisposeAsync();
     }
 
-    public async Task RefreshPublishedAsync()
+
+
+    public async Task RefreshAsync() => await LoadPublishedPostsAsync();
+    public async Task RefreshPublishedAsync() => await LoadAdminPublishedPostsAsync();
+    public async Task RefreshDraftAsync() => await LoadAdminDraftPostsAsync();
+
+    private async Task ListFeatured()
     {
-        await LoadAdminPublishedPostsAsync();
+        var featured = await PostClient.ListFeatured();
+        featuredPosts = featured.Value ?? new List<FeaturedPostDto>();
     }
 
-    public async Task RefreshDraftAsync()
+    private async Task GetCurrentUser()
     {
-        await LoadAdminDraftPostsAsync();
+        var request = await ClientService.GetCurrentUser();
+        userProfile = request.Value;
     }
 
-   
     private async Task LoadPublishedPostsAsync()
     {
         var recent = await PostClient.ListPublished(Pagination);
@@ -215,5 +221,11 @@
         ListDraftForAdmin = listDraftForAdmin.Value;
         StateHasChanged();
     }
-    
+
+    public async Task HandleReadMore(int? Id)
+    {
+        await PostClient.TrackPostView(Id);
+        Navigation.NavigateTo($"viewblogconstruct/{Id}");
+        StateHasChanged();
+    }
 }

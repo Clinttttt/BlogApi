@@ -1,5 +1,6 @@
-using BlogApi.Client;
 using Blog.Client.Components;
+using Blog.Infrastructure.Hubs;
+using BlogApi.Client;
 using BlogApi.Client.Middleware;
 using BlogApi.Client.Security;
 using Microsoft.AspNetCore.Authentication;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
+builder.Services.AddSignalR();
 builder.Services.Configure<CircuitOptions>(options =>
 {
     options.DetailedErrors = true;
@@ -40,7 +41,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.Middleware();
 app.UseAntiforgery();
-
+app.MapHub<PostHub>("/posthub");
 app.UseAuthentication();
 app.UseAuthorization();
 

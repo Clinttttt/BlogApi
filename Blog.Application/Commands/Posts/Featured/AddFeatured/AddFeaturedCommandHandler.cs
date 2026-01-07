@@ -3,6 +3,7 @@ using BlogApi.Domain.Interfaces;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
 {
-    public class AddFeaturedCommandHandler(IAppDbContext context) : IRequestHandler<AddFeaturedCommand, Result<bool>>
+    public class AddFeaturedCommandHandler(IAppDbContext context, IMemoryCache cache) : IRequestHandler<AddFeaturedCommand, Result<bool>>
     {
         public async Task<Result<bool>> Handle(AddFeaturedCommand request, CancellationToken cancellationToken)
         {
@@ -29,6 +30,7 @@ namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
                 });
             }
             await context.SaveChangesAsync(cancellationToken);
+            cache.Remove("featured-posts");
             return Result<bool>.Success(true);
         }
     }

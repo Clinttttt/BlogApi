@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blog.Domain.Entities;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,6 +17,7 @@ namespace BlogApi.Domain.Entities
         public string? Title { get;  set; }
         public string? Content { get;  set; }
         public byte[]? Photo { get; set; }
+        public int? ViewCount { get; set; }
         public string? PhotoContent { get; set; }
         public string? Author { get; set; }
         public Status Status { get; set; }
@@ -29,7 +31,7 @@ namespace BlogApi.Domain.Entities
         public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
         public ICollection<BookMark> BookMarks { get; set; } = new List<BookMark>();
         public ICollection<Featured> Featured { get; set; } = new List<Featured>();
-
+        public ICollection<PostView> PostViews { get; set; } = new List<PostView>();
     }
 
 

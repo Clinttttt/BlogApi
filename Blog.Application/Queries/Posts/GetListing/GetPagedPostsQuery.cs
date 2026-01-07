@@ -23,6 +23,7 @@ namespace BlogApi.Application.Queries.Posts
 
     public enum PostFilterType
     {
+        BookMark,
         Published,              // All published posts
         PublishedByUser,        // Published posts by specific user
         Drafts,                 // All drafts

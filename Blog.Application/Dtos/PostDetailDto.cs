@@ -9,7 +9,7 @@ namespace BlogApi.Application.Dtos
 {
     public class PostDetailDto
     {
-      
+       public int? PostId { get; set; }
         public string? Title { get; set; }
         public string? Content { get; set; }
         public DateTime PostCreatedAt { get; set; }  
@@ -19,6 +19,7 @@ namespace BlogApi.Application.Dtos
         public byte[]? Photo { get; set; }
         public string? PhotoContent { get; set; }
         public string? Author { get; set; }
+        public int? ViewCount { get; set; }
         public ReadingDuration readingDuration { get; set; }
         public int PostLike { get; set; }
         public int CommentCount { get; set; }

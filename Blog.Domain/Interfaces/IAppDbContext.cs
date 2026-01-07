@@ -1,4 +1,5 @@
-﻿using BlogApi.Domain.Entities;
+﻿using Blog.Domain.Entities;
+using BlogApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace BlogApi.Domain.Interfaces
         DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
         DbSet<UserInfo> UserInfos { get; set; }
         DbSet<Featured> Featureds { get; set; }
+        DbSet<PostView> PostViews { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

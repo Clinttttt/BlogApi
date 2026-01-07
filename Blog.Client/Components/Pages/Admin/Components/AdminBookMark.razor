@@ -109,9 +109,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await ListBookMark();
+        hasrender = true;
+    }
+
+    private async Task ListBookMark()
+    {
         var request = await PostClient.ListBookMark(Pagination);
         PostDtos = request.Value?.Items;
-        hasrender = true;
     }
 
     public async Task HandleBookMark(int? PostId)

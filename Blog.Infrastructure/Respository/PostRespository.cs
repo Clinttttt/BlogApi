@@ -38,6 +38,7 @@ namespace BlogApi.Infrastructure.Respository
 
             var totalcount = await query.CountAsync();
             var posts = await query
+              .AsNoTracking()
               .OrderByDescending(s => s.CreatedAt)
               .Skip((PageNumber - 1) * PageSize)
               .Take(PageSize)
@@ -76,6 +77,8 @@ namespace BlogApi.Infrastructure.Respository
                                 CreatedAt = s.CreatedAt,
                                 CategoryName = s.Category?.Name,
                                 Status = s.Status,
+                                ViewCount = s.ViewCount,
+                                IsBookMark = s.BookMarks.Any(),
                                 CommentCount = s.Comments.Count(),
                                 PostLike = s.PostLikes.Count(),
                                 readingDuration = s.readingDuration,
@@ -109,6 +112,7 @@ namespace BlogApi.Infrastructure.Respository
                 query = query.Where(filter);
             }
             return await query
+                .AsNoTracking()
                 .OrderByDescending(s => s.CreatedAt)
                 .Include(s => s.PostTags)
                     .ThenInclude(s => s.tag)
@@ -121,6 +125,7 @@ namespace BlogApi.Infrastructure.Respository
         public async Task<Post?> GetAsync(int postId, CancellationToken cancellationToken = default)
         {
             return await context.Posts
+                   .AsNoTracking()
                 .Include(s => s.Category)
                 .Include(s => s.PostLikes)
                 .Include(s => s.PostTags)
@@ -133,8 +138,7 @@ namespace BlogApi.Infrastructure.Respository
                         .ThenInclude(u => u.UserInfo)
                 .Include(s => s.Comments)
                     .ThenInclude(c => c.User)
-                        .ThenInclude(u => u.ExternalLogins)
-                .AsNoTracking()
+                        .ThenInclude(u => u.ExternalLogins)            
                 .FirstOrDefaultAsync(s => s.Id == postId, cancellationToken);
         }
 

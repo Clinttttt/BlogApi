@@ -11,20 +11,20 @@ namespace BlogApi.Client.Services
         private readonly NavigationManager _navigation;
         private readonly AuthStateProvider _authStateProvider;
         private readonly ILogger<GoogleAuthCallbackService> _logger;
-        private readonly TokenCacheService _tokenCache;
+      
 
         public GoogleAuthCallbackService(
             IAuthClientService authService,
             NavigationManager navigation,
             AuthStateProvider authStateProvider,
-            ILogger<GoogleAuthCallbackService> logger,
-            TokenCacheService tokenCache)
+            ILogger<GoogleAuthCallbackService> logger
+           )
         {
             _authService = authService;
             _navigation = navigation;
             _authStateProvider = authStateProvider;
             _logger = logger;
-            _tokenCache = tokenCache;
+          
         }
 
         public async Task ProcessLogin(string idToken)
@@ -37,10 +37,7 @@ namespace BlogApi.Client.Services
                     var accessToken = result.Value.AccessToken!.Trim().Trim('"').Trim();
                     var refreshToken = result.Value.RefreshToken!.Trim().Trim('"').Trim();
 
-                    // Legacy call (NO-OP): token is stored via HttpOnly cookies
-                    _tokenCache.CacheToken(accessToken);
-
-                  
+                                 
                     var encodedAccessToken = Uri.EscapeDataString(accessToken);
                     var encodedRefreshToken = Uri.EscapeDataString(refreshToken);
 
@@ -64,7 +61,7 @@ namespace BlogApi.Client.Services
         {
             try
             {
-                _tokenCache.ClearCache();
+              
 
                 
                 _navigation.NavigateTo("/_auth/clearcookie", forceLoad: true);

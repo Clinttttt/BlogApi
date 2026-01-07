@@ -15,36 +15,34 @@ namespace BlogApi.Application.Queries.Posts.GetFeatured
 {
     public class GetListFeaturedQueryHandler(
         IPostRespository respository,
-        IMemoryCache cache) 
+        IMemoryCache cache)
         : IRequestHandler<GetListFeaturedQuery, Result<List<FeaturedPostDto>>>
     {
-        public async Task<Result<List<FeaturedPostDto>>> Handle(
-            GetListFeaturedQuery request,
-            CancellationToken cancellationToken)
+        public async Task<Result<List<FeaturedPostDto>>> Handle(GetListFeaturedQuery request,CancellationToken cancellationToken)
         {
             var cacheKey = "featured-posts";
-            
-            var isCached = cache.TryGetValue(cacheKey, out Result<List<FeaturedPostDto>>? _);
 
+            if (cache.TryGetValue(cacheKey, out Result<List<FeaturedPostDto>>? cachedValue))           
+                return cachedValue;
+            
             return await cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                           
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
 
                 var featured = await respository.GetNonPaginatedPostAsync(
                     filter: s => s.Featured.Any(),
                     cancellationToken);
 
-                if (!featured.Any())
-                {                 
+                if (!featured.Any())               
                     return Result<List<FeaturedPostDto>>.NoContent();
-                }
+                
 
                 var filter = featured.Select(s => new FeaturedPostDto
                 {
                     Title = s!.Title,
                     Content = s!.Content,
                     PostId = s.Id,
+                    ViewCount = s.ViewCount ?? 0,
                     CreatedAt = s.CreatedAt,
                     ReadingDuration = s.readingDuration,
                 }).ToList();

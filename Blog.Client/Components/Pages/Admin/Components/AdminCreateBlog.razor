@@ -451,7 +451,7 @@
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        if (file != null && file.Size <= 10485760) // 10MB limit
+        if (file != null && file.Size <= 10485760) 
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10485760);
             using var memoryStream = new MemoryStream();
