@@ -1,7 +1,12 @@
-﻿using BlogApi.Domain.Common;
+﻿using Blog.Application.Abstractions;
+using BlogApi.Application.Queries.Posts;
+using BlogApi.Domain.Common;
+using BlogApi.Domain.Entities;
 using BlogApi.Domain.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Posts.BookMark
 {
-    public class AddBookMarkCommandHandler(IAppDbContext context) : IRequestHandler<AddBookMarkCommand, Result<bool>>
+    public class AddBookMarkCommandHandler(IAppDbContext context, IMemoryCache cache) : IRequestHandler<AddBookMarkCommand, Result<bool>>
     {
         public async Task<Result<bool>> Handle(AddBookMarkCommand request, CancellationToken cancellationToken)
         {
@@ -29,7 +34,15 @@ namespace BlogApi.Application.Commands.Posts.BookMark
             {
                 context.BookMarks.Remove(bookmark);
             }
+            
             await context.SaveChangesAsync(cancellationToken);
+            foreach (var key in CacheTracker.Keys)
+            {
+                cache.Remove(key);
+            }
+            CacheTracker.Keys.Clear();
+
+
             return Result<bool>.Success(true);
         }
     }

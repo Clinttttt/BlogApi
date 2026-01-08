@@ -23,7 +23,14 @@
 
         </div>
         
-        <Sidebar />
+        @if (!HIdeMenu)
+        {
+            <Sidebar />
+        }
     </div>
 </div>
 
+@code{
+
+    private bool HIdeMenu => Navigation.ToBaseRelativePath(Navigation.Uri).Equals("admin/create-blog", StringComparison.OrdinalIgnoreCase);
+}

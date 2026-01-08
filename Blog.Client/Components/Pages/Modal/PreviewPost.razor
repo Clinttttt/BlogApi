@@ -1,0 +1,280 @@
+﻿
+<input type="checkbox" id="preview_post" class="modal-toggle" />
+<div class="modal" role="dialog">
+    <div class="modal-box  w-11/12 max-w-5xl max-h-[90vh] overflow-hidden rounded-md">
+       
+
+        <div class="h-screen bg-gray-50 py-8 overflow-auto pb-20">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                @if (Post is null)
+                {
+
+                    <article class="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
+
+
+                        <div class="px-8 pt-8">
+                            <div class="skeleton h-6 w-24 rounded-full"></div>
+                        </div>
+
+
+                        <div class="px-8 pt-4 pb-6">
+                            <div class="skeleton h-10 w-full mb-3"></div>
+                            <div class="skeleton h-10 w-3/4 mb-4"></div>
+
+                            <div class="flex flex-wrap items-center gap-6">
+                                <div class="skeleton h-4 w-32"></div>
+                                <div class="skeleton h-4 w-40"></div>
+                                <div class="skeleton h-4 w-24"></div>
+                            </div>
+                        </div>
+
+
+                        <div class="w-full h-96">
+                            <div class="skeleton w-full h-full"></div>
+                        </div>
+
+
+                        <div class="px-8 py-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="skeleton h-10 w-24 rounded-lg"></div>
+                                    <div class="skeleton h-10 w-24 rounded-lg"></div>
+                                </div>
+                                <div class="skeleton h-10 w-10 rounded-lg"></div>
+                            </div>
+                        </div>
+
+
+                        <div class="px-8 py-8">
+                            <div class="space-y-3 mb-6">
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-5/6"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-4/5"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-full"></div>
+                                <div class="skeleton h-4 w-3/4"></div>
+                            </div>
+
+
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <div class="flex flex-wrap gap-2">
+                                    <div class="skeleton h-8 w-20 rounded-md"></div>
+                                    <div class="skeleton h-8 w-24 rounded-md"></div>
+                                    <div class="skeleton h-8 w-28 rounded-md"></div>
+                                    <div class="skeleton h-8 w-32 rounded-md"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden p-8">
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="skeleton h-6 w-6 rounded"></div>
+                            <div class="skeleton h-8 w-40"></div>
+                        </div>
+
+
+                        <div class="space-y-6">
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="flex gap-4">
+                                    <div class="skeleton h-10 w-10 rounded-full flex-shrink-0"></div>
+                                    <div class="flex-1">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="skeleton h-5 w-32"></div>
+                                                <div class="skeleton h-4 w-24"></div>
+                                            </div>
+                                            <div class="skeleton h-4 w-full mb-2"></div>
+                                            <div class="skeleton h-4 w-3/4"></div>
+                                        </div>
+                                        <div class="mt-2 flex items-center gap-4">
+                                            <div class="skeleton h-4 w-16"></div>
+                                            <div class="skeleton h-4 w-16"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+
+                        <div class="mt-8">
+                            <div class="flex gap-4">
+                                <div class="skeleton h-10 w-10 rounded-full flex-shrink-0"></div>
+                                <div class="flex-1">
+                                    <div class="skeleton h-24 w-full rounded-lg mb-3"></div>
+                                    <div class="flex justify-end">
+                                        <div class="skeleton h-10 w-32 rounded-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+
+                    <article class="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
+
+                        <div class="px-8 pt-8">
+                            @if (!string.IsNullOrEmpty(CategoryName))
+                            {
+                                <span class="inline-block bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-semibold">
+                                    @CategoryName
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <div class="px-8 pt-4 pb-6">
+                            <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                                @Post.Title
+                            </h1>
+
+
+                            <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span>@Name?.Name</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>@date.ToString("MMMM dd, yyyy")</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>@Post.ReadingDuration.GetDisplayName()</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        @if (!string.IsNullOrEmpty(previewImageUrl))
+                        {
+                            <div class="w-full h-96 overflow-hidden">
+                                <img src="@previewImageUrl" class="w-full h-full object-cover" />
+                            </div>
+                        }
+
+
+                        <div class="px-8 py-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <button
+                                            class="flex items-center gap-2 px-4 cursor-pointer py-2 rounded-lg transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <svg class="w-5 h-5 " viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                        <span class="font-semibold"></span>
+                                    </button>
+
+                                    <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        <span class="font-semibold">Share</span>
+                                    </button>
+                                </div>
+
+                                <button 
+                                        class="p-2 cursor-pointer rounded-lg transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                    <svg class="w-5 h-5 " fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <div class="px-8 py-8">
+                            <div class="blog-content">
+                                @((MarkupString)Post.Content!)
+                            </div>
+
+
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <div class="flex flex-wrap gap-2">
+                                    @if (FilteredTag?.Value?.Any() == true)
+                                    {
+                                        @foreach (var tag in FilteredTag.Value.Where(s => selectedTags!.Contains(s.Id)))
+                                        {
+                                            <span class="bg-gray-200 px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-300 transition-colors">
+                                                @tag.Name
+                                            </span>
+                                        }
+                                    }
+                                </div>
+                              
+                            </div>
+
+                        </div>
+                      
+                    </article>
+
+                    <div class="modal-action mb-6">
+                        <label for="preview_post" class="btn text-indigo-500 bg-white">Close!</label>
+                    </div>
+                   
+                }
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public CreatePostRequest Post { get; set; } = new CreatePostRequest();
+    [Parameter]
+    public UserProfileDto? Name { get; set; } = new UserProfileDto();
+    [Parameter]
+    public Result<List<TagDto>>? FilteredTag { get; set; }
+    [Parameter]
+    public string previewImageUrl { get; set; } = string.Empty;
+    [Parameter]
+    public List<int>? selectedTags { get; set; } = new List<int>();
+
+
+    private string? CategoryName { get; set; }
+    private List<CategoryDto>? cat { get; set; } = new List<CategoryDto>();
+    private List<TagDto>? Tags { get; set; } = new List<TagDto>();
+    private List<TagDto>? Selectedtag { get; set; } = new List<TagDto>();
+    private DateTime date = DateTime.UtcNow.AddHours(8);
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetCategory();
+        Console.WriteLine($"Preview image length: {previewImageUrl?.Length}");
+       
+    }
+
+    public async Task GetCategory()
+    {
+        var request = await CategoryClient.GetListing();
+        cat = request.Value;
+        CategoryName = cat?.Where(s => s.Id == Post.CategoryId).Select(s => s.Name).FirstOrDefault();
+    }
+
+   
+
+
+}
+
+

@@ -20,7 +20,7 @@ namespace BlogApi.Domain.Entities
         public int? ViewCount { get; set; }
         public string? PhotoContent { get; set; }
         public string? Author { get; set; }
-        public Status Status { get; set; }
+        public Status Status { get; set; } 
         public DateTime CreatedAt { get;  set; }
         public ReadingDuration readingDuration { get; set; }
         public int? CategoryId { get; set; }

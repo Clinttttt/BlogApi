@@ -1,0 +1,168 @@
+﻿
+
+
+/* TinyMCE Custom Skin - Light Mode */
+
+.tox-tinymce {
+   height: 45rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+
+}
+
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar__primary {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.tox .tox-edit-area {
+    background: #ffffff !important;
+}
+
+.tox .tox-statusbar {
+    background: #f9fafb !important;
+    border-top: 1px solid #e5e7eb !important;
+}
+
+/* Dialog Styling */
+.tox .tox-dialog {
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.tox .tox-dialog__header {
+    padding: 20px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    flex-shrink: 0 !important;
+}
+
+.tox .tox-dialog__title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+}
+
+.tox .tox-dialog__body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: calc(90vh - 140px) !important;
+}
+
+.tox .tox-dialog__body-content {
+    padding: 20px !important;
+    background: #ffffff !important;
+}
+
+.tox .tox-dialog__footer {
+    padding: 16px 20px !important;
+    background: #f9fafb !important;
+    border-top: 1px solid #e5e7eb !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+}
+
+/* Code Sample Dialog - Dark Code Editor in Light Dialog */
+.tox textarea[aria-label="Code view"],
+.tox .tox-dialog__body-content textarea {
+    min-height: 350px !important;
+    max-height: 500px !important;
+    height: 400px !important;
+    padding: 24px !important;
+    margin-bottom: 0 !important;
+    background: #1a1a1a !important;
+    color: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 12px !important;
+    font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+.tox .tox-textarea,
+.tox .tox-textfield {
+    padding: 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #d1d5db !important;
+    font-size: 14px !important;
+    background: #ffffff !important;
+}
+
+    .tox .tox-textarea:focus,
+    .tox .tox-textfield:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        outline: none !important;
+    }
+
+/* Select Dropdown */
+.tox .tox-selectfield select {
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #d1d5db !important;
+    font-size: 14px !important;
+    background: #ffffff !important;
+}
+
+/* Buttons */
+.tox .tox-button {
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+
+.tox .tox-button--secondary {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+}
+
+    .tox .tox-button--secondary:hover {
+        background: #f9fafb !important;
+        border-color: #9ca3af !important;
+    }
+
+.tox .tox-button:not(.tox-button--secondary) {
+    background: #6366f1 !important;
+    border: none !important;
+    color: #ffffff !important;
+}
+
+    .tox .tox-button:not(.tox-button--secondary):hover {
+        background: #4f46e5 !important;
+    }
+
+/* Labels */
+.tox .tox-label {
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+}
+
+/* Toolbar Icons */
+.tox .tox-tbtn {
+    color: #4b5563 !important;
+}
+
+    .tox .tox-tbtn:hover {
+        background: #f3f4f6 !important;
+    }
+
+.tox .tox-tbtn--enabled {
+    background: #e0e7ff !important;
+}
+.tox .tox-edit-area__iframe {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}

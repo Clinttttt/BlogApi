@@ -18,7 +18,7 @@ namespace BlogApi.Application.Dtos
         public ReadingDuration readingDuration { get; set; }
         public List<TagDto>? Tags { get; set; }
         public bool IsBookMark { get; set; }
-        public Status Status { get; set; }
+        public Status Status { get; set; } 
         public byte[]? Photo { get; set; }
         public string? PhotoContent { get; set; }
         public string? Author { get; set; }

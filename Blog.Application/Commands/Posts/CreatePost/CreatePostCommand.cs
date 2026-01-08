@@ -12,7 +12,7 @@ namespace BlogApi.Application.Commands.Posts.CreatePost
     public record CreatePostCommand(
         string Title, 
         string Content,
-        int CategoryId, 
+        int? CategoryId, 
         Guid UserId,
         byte[]? Photo,
         string? PhotoContent,

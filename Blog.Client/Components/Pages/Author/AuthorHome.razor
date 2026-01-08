@@ -51,7 +51,7 @@
 
         @if (PageState.AuthorPageView == PageState.AuthorPostState.all_post)
         {
-            <Featured featuredPosts="featuredPosts" />
+            <Featured featuredPosts="featuredPosts" ReadMore="HandleReadMore" />
             <AllPosts recentPost="recentPost" Pagination="Pagination" Refresh="RefreshAsync" />
 
         }
@@ -114,6 +114,17 @@
     {
         await ListFeatured();
         await ListPublished();
+
+        await SignalR.InitializeAsync();
+        SignalR.OnViewCountUpdate((postId, viewCount) =>
+       {
+           var post = featuredPosts?.FirstOrDefault(p => p.PostId == postId);
+           if (post != null)
+           {
+               post.ViewCount = viewCount;
+               InvokeAsync(StateHasChanged);
+           }
+       });
     }
     public async Task RefreshAsync()
     {
@@ -132,5 +143,11 @@
     {
         var recent = await PostClient.ListPublished(Pagination);
         recentPost = recent.Value;
+    }
+    public async Task HandleReadMore(int? Id)
+    {
+        await PostClient.TrackPostView(Id);
+        Navigation.NavigateTo($"viewblogconstruct/{Id}");
+        StateHasChanged();
     }
 }

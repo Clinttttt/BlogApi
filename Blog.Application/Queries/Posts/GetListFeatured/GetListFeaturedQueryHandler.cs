@@ -18,37 +18,40 @@ namespace BlogApi.Application.Queries.Posts.GetFeatured
         IMemoryCache cache)
         : IRequestHandler<GetListFeaturedQuery, Result<List<FeaturedPostDto>>>
     {
-        public async Task<Result<List<FeaturedPostDto>>> Handle(GetListFeaturedQuery request,CancellationToken cancellationToken)
+        public async Task<Result<List<FeaturedPostDto>>> Handle(GetListFeaturedQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = "featured-posts";
 
-            if (cache.TryGetValue(cacheKey, out Result<List<FeaturedPostDto>>? cachedValue))           
+          
+            if (cache.TryGetValue(cacheKey, out Result<List<FeaturedPostDto>>? cachedValue))
                 return cachedValue;
-            
-            return await cache.GetOrCreateAsync(cacheKey, async entry =>
+        
+            var featured = await respository.GetNonPaginatedPostAsync(
+                filter: s => s.Featured.Any(),
+                cancellationToken);
+
+          
+            if (!featured.Any())
+                return Result<List<FeaturedPostDto>>.NoContent();
+
+          
+            var resultList = featured.Select(s => new FeaturedPostDto
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                Title = s!.Title,
+                Content = s!.Content,
+                PostId = s.Id,
+                ViewCount = s.ViewCount ?? 0,
+                CreatedAt = s.CreatedAt,
+                ReadingDuration = s.readingDuration,
+            }).ToList();
 
-                var featured = await respository.GetNonPaginatedPostAsync(
-                    filter: s => s.Featured.Any(),
-                    cancellationToken);
+            var result = Result<List<FeaturedPostDto>>.Success(resultList);
 
-                if (!featured.Any())               
-                    return Result<List<FeaturedPostDto>>.NoContent();
-                
+         
+            cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
 
-                var filter = featured.Select(s => new FeaturedPostDto
-                {
-                    Title = s!.Title,
-                    Content = s!.Content,
-                    PostId = s.Id,
-                    ViewCount = s.ViewCount ?? 0,
-                    CreatedAt = s.CreatedAt,
-                    ReadingDuration = s.readingDuration,
-                }).ToList();
-
-                return Result<List<FeaturedPostDto>>.Success(filter);
-            })!;
+            return result;
         }
+
     }
 }

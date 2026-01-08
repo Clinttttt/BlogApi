@@ -303,40 +303,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         postRequest.PostId = PostId;
-        addBookMarkRequest.PostId = PostId;
-        togglePostLikeRequest.PostId = PostId;
-
-        var result = await PostClient.Get(postRequest);
-        PostDto = result.Value;
-
-        if (PostDto?.Photo is not null)
-        {
-            Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
-        }
-
+        await Get();
         await SignalR.InitializeAsync();
 
         await Task.Delay(100);
         SignalR.OnSentComment(async (postId, content) =>
-        {
-            Console.WriteLine($"[Blazor] SignalRrrrr State: {SignalR.ConnectionState}");
-            Console.WriteLine($"[Blazor] Watching PostId: {PostId}");
+        {      
 
             if (PostDto?.PostId == postId)
-            {
-              
+            {             
                 var updatedResult = await PostClient.Get(postRequest);
                 PostDto = updatedResult.Value;
                 await InvokeAsync(StateHasChanged);
-              
+
             }
-          
+
         });
 
         hasrender = true;
-
     }
 
     public async ValueTask DisposeAsync()
@@ -344,20 +329,29 @@
         await SignalR.DisposeAsync();
     }
 
-
+    private async Task Get()
+    {
+       
+        var result = await PostClient.Get(postRequest);
+        PostDto = result.Value;
+        if (PostDto?.Photo is not null)
+        {
+            Preview = $"data:{PostDto.PhotoContent};base64,{Convert.ToBase64String(PostDto.Photo)}";
+        }
+    }
 
     private async Task HandleSubmitComment()
     {
         addCommentRequest.PostId = PostId;
         var request_comment = await PostClient.AddComment(addCommentRequest);
 
-  
         var result = await PostClient.Get(postRequest);
         PostDto = result.Value;
 
         addCommentRequest = new AddCommentRequest();
         StateHasChanged();
     }
+
     public async Task GetCommentId(int commentId)
     {
         toggleCommentLikeRequest.CommentId = commentId;
@@ -369,6 +363,7 @@
 
     private async Task HandlePostLike()
     {
+        togglePostLikeRequest.PostId = PostId;
         var request = await PostClient.ToggleLikePost(togglePostLikeRequest);
         var result = await PostClient.Get(postRequest);
         PostDto = result.Value;
@@ -377,6 +372,7 @@
 
     public async Task HandleBookMark()
     {
+        addBookMarkRequest.PostId = PostId;
         var request = await PostClient.AddBookMark(addBookMarkRequest);
         var result = await PostClient.Get(postRequest);
         PostDto = result.Value;

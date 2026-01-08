@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Blog.Application.Abstractions
 {
-    public class PageRequest
+    public static class CacheTracker
     {
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public static HashSet<string> Keys { get; } = new();
     }
 }

@@ -28,6 +28,7 @@ namespace BlogApi.Application.Queries.User.GetCurrentUser
                            .FirstOrDefault(el => el.Provider == "Google" && el.ProfilePhotoBytes != null) != null
                          ? $"data:image/jpeg;base64,{Convert.ToBase64String(user.ExternalLogins.First(el => el.Provider == "Google").ProfilePhotoBytes!)}"
                          : string.Empty,
+                Name = user.UserInfo != null ? user.UserInfo.FullName : user.UserName,
             };
             
             if (photo is null)
