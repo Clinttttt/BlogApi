@@ -1,36 +1,37 @@
-﻿using BlogApi.Domain.Common;
+﻿using Blog.Application.Abstractions;
+using Blog.Application.Common;
+using Blog.Application.Common.Interfaces;
+using BlogApi.Domain.Common;
+using BlogApi.Domain.Entities;
 using BlogApi.Domain.Interfaces;
-using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
 {
-    public class AddFeaturedCommandHandler(IAppDbContext context, IMemoryCache cache) : IRequestHandler<AddFeaturedCommand, Result<bool>>
+    public class AddFeaturedCommandHandler(IAppDbContext context, ICacheInvalidationService cacheInvalidation) : IRequestHandler<AddFeaturedCommand, Result<bool>>
     {
-        public async Task<Result<bool>> Handle(AddFeaturedCommand request, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(
+            AddFeaturedCommand request,
+            CancellationToken cancellationToken)
         {
-            var featured = await context.Featureds.FirstOrDefaultAsync(s => s.PostId == request.PostId);
+          
+            var featured = await context.Featureds
+                .FirstOrDefaultAsync(s => s.PostId == request.PostId, cancellationToken);
+
             if (featured is not null)
-            {
                 return Result<bool>.Conflict();
-            }
-            else
+    
+            context.Featureds.Add(new Domain.Entities.Featured
             {
-                context.Featureds.Add(new Domain.Entities.Featured
-                {
-                    PostId = request.PostId,
-                    UserID = request.UserId
-                });
-            }
+                PostId = request.PostId,
+                UserID = request.UserId
+            });
+
             await context.SaveChangesAsync(cancellationToken);
-            cache.Remove("featured-posts");
+            await cacheInvalidation.InvalidateFeaturedCacheAsync();
             return Result<bool>.Success(true);
         }
     }

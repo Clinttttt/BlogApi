@@ -1,5 +1,6 @@
 ﻿using Application.Queries.GetRecentActivity;
 using Blog.Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.Posts.GetApprovalTotal;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 
@@ -14,8 +15,8 @@ namespace BlogApi.Client.Interface
         Task<Result<int>> Create(CreatePostRequest dto);
         Task<Result<PostDetailDto>> Get(GetPostRequest request);
         Task<Result<int>> Update(UpdatePostRequest dto);
-        Task<Result<bool>> Archive(ArchivePostRequest request);
         Task<Result<bool>> Delete(DeletePostRequest request);
+        Task<Result<bool>> Archive(ArchivePostRequest request);
 
 
         Task<Result<PagedResult<PostDto>>> ListPublishedForAdmin(ListPaginatedRequest request);
@@ -23,16 +24,13 @@ namespace BlogApi.Client.Interface
         Task<Result<PagedResult<PostDto>>> ListPublished(ListPaginatedRequest request);
         Task<Result<PagedResult<PostDto>>> ListByTag(int tagId, ListPaginatedRequest request);
         Task<Result<PagedResult<PostDto>>> ListByCategory(int Id, ListPaginatedRequest request);
-
-
-
-        Task<Result<bool>> ToggleLikePost(TogglePostLikeRequest request);
-        Task<Result<bool>> AddBookMark(AddBookMarkRequest request);
+        Task<Result<PagedResult<PostDto>>> ListByPending(ListPaginatedRequest request);
         Task<Result<PagedResult<PostDto>>> ListBookMark(ListPaginatedRequest request);
-        Task<Result<bool>> AddFeatured(AddFeaturedRequest dto);
         Task<Result<List<FeaturedPostDto>>> ListFeatured();
 
-
+        Task<Result<bool>> ToggleLikePost(TogglePostLikeRequest request);
+        Task<Result<bool>> AddBookMark(AddBookMarkRequest request);    
+        Task<Result<bool>> AddFeatured(AddFeaturedRequest dto);     
         Task<Result<int>> AddComment(AddCommentRequest dto);
         Task<Result<int>> UpdateComment(UpdateCommentRequest dto);
         Task<Result<bool>> ToggleLikeComment(ToggleCommentLikeRequest dto);
@@ -42,5 +40,6 @@ namespace BlogApi.Client.Interface
         Task<Result<StatisticsDto>> GetPublicStatistics();
         Task<Result<StatisticsDto>> GetStatistics();
         Task<Result<bool>> TrackPostView(int? PostId);
+        Task<Result<GetApprovalTotalDto>> GetApprovalTotal();
     }
 }

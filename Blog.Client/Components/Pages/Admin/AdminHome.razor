@@ -1,6 +1,7 @@
 ﻿@page "/admin_home"
 
 
+@using Blog.Application.Queries.Posts.GetApprovalTotal
 @using Microsoft.AspNetCore.SignalR.Client
 
 <main class="p-6 lg:p-8 max-w-7xl w-full overflow-auto h-screen ">
@@ -36,10 +37,13 @@
             </NavLink>
 
             <div class="indicator">
-                <span class="indicator-item badge bg-indigo-500 text-white">2</span>
-                <button class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 transition-all">
+                @if (TotalApproval?.Count > 0)
+                {
+                    <span class="indicator-item badge bg-indigo-500 text-white">@TotalApproval.Count</span>
+                }
+                <NavLink href="approval" class=" cursor-pointer px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 transition-all">
                     Approval
-                </button>
+                </NavLink>
             </div>
 
             <button @onclick="() => PageState.AdminView(PageState.AdminPostState.home)" class="btn btn-ghost btn-square bg-indigo-50 hover:bg-indigo-50">
@@ -95,7 +99,7 @@
                 </svg>
                 <input type="text" class="w-[100%]" placeholder="Search posts..." />
             </label>
-            <NavLink href="admin/create-blog" class=" cursor-pointer btn text-white bg-indigo-500 gap-2 whitespace-nowrap">
+            <NavLink href="create-post" class=" cursor-pointer btn text-white bg-indigo-500 gap-2 whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -115,19 +119,19 @@
     }
     else if (PageState.AdminPageView == PageState.AdminPostState.published)
     {
-        <AdminPublished ListForAdmin="ListForAdmin" Pagination="PaginationPublished" Refresh="RefreshPublishedAsync" />
+        <Blog.Client.Components.Pages.Admin.Components.Published ListForAdmin="ListForAdmin" Pagination="PaginationPublished" Refresh="RefreshPublishedAsync" />
     }
     else if (PageState.AdminPageView == PageState.AdminPostState.draft)
     {
-        <AdminDraft ListDraftForAdmin="ListDraftForAdmin" Pagination="PaginationDraft" Refresh="RefreshDraftAsync" />
+        <Blog.Client.Components.Pages.Admin.Components.Draft ListDraftForAdmin="ListDraftForAdmin" Pagination="PaginationDraft" Refresh="RefreshDraftAsync" />
     }
     else if (PageState.AdminPageView == PageState.AdminPostState.author)
     {
-        <AdminAuthor />
+        <Blog.Client.Components.Pages.Admin.Components.Author />
     }
     else if (PageState.AdminPageView == PageState.AdminPostState.overview)
     {
-        <AdminOverview />
+        <Blog.Client.Components.Pages.Admin.Components.Overview />
     }
 </main>
 
@@ -150,6 +154,7 @@
     private PagedResult<PostDto>? ListForAdmin { get; set; } = new PagedResult<PostDto>();
     private PagedResult<PostDto>? ListDraftForAdmin { get; set; } = new PagedResult<PostDto>();
 
+    private GetApprovalTotalDto? TotalApproval { get; set; } = new GetApprovalTotalDto();
     private ListPaginatedRequest Pagination { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
     private ListPaginatedRequest PaginationPublished { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
     private ListPaginatedRequest PaginationDraft { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 10 };
@@ -158,24 +163,40 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await GetCurrentUser();
-        await ListFeatured();
-        await LoadPublishedPostsAsync();
-        await LoadAdminPublishedPostsAsync();
-        await LoadAdminDraftPostsAsync();
+       
+        var getUserTask = GetCurrentUser();
+        var listFeaturedTask = ListFeatured();
+        var loadRecentTask = LoadPublishedPostsAsync();
+        var loadAdminPublishedTask = LoadAdminPublishedPostsAsync();
+        var loadAdminDraftTask = LoadAdminDraftPostsAsync();
+        var getApprovalTask = GetApprovalTotal();
+        var signalRTask = SignalR.InitializeAsync();
+    
+        await Task.WhenAll(
+            getUserTask,
+            listFeaturedTask,
+            loadRecentTask,
+            loadAdminPublishedTask,
+            loadAdminDraftTask,
+            getApprovalTask,
+            signalRTask
+        );
 
-        await SignalR.InitializeAsync();
-        SignalR.OnViewCountUpdate((postId, viewCount) =>
-       {
-           var post = featuredPosts?.FirstOrDefault(p => p.PostId == postId);
-           if (post != null)
-           {
-               post.ViewCount = viewCount;
-               InvokeAsync(StateHasChanged);
-           }
-       });
-
+        OnViewCountUpdate(); 
         hasrender = true;
+    }
+
+    public void OnViewCountUpdate()
+    {
+        SignalR.OnViewCountUpdate((postId, viewCount) =>
+   {
+       var post = featuredPosts?.FirstOrDefault(p => p.PostId == postId);
+       if (post != null)
+       {
+           post.ViewCount = viewCount;
+           InvokeAsync(StateHasChanged);
+       }
+   });
     }
 
     public async ValueTask DisposeAsync()
@@ -183,10 +204,10 @@
         await SignalR.DisposeAsync();
     }
 
-
-
     public async Task RefreshAsync() => await LoadPublishedPostsAsync();
+
     public async Task RefreshPublishedAsync() => await LoadAdminPublishedPostsAsync();
+
     public async Task RefreshDraftAsync() => await LoadAdminDraftPostsAsync();
 
     private async Task ListFeatured()
@@ -226,6 +247,13 @@
     {
         await PostClient.TrackPostView(Id);
         Navigation.NavigateTo($"viewblogconstruct/{Id}");
+        StateHasChanged();
+    }
+
+    public async Task GetApprovalTotal()
+    {
+        var request = await PostClient.GetApprovalTotal();
+        TotalApproval = request.Value;
         StateHasChanged();
     }
 }

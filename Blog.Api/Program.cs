@@ -1,5 +1,5 @@
 using AutoMapper;
-
+using Blog.Application.Abstractions;
 using Blog.Application.Common.Interfaces;
 using Blog.Infrastructure.Hubs;
 using Blog.Infrastructure.Services;
@@ -19,7 +19,11 @@ builder.Services.AddMediatR(configuration =>
 });
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IPostHubService, PostHubService>();
+
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
+builder.Services.AddScoped<ICacheInvalidationService, CacheInvalidationService>();
+
 builder.ConfigureServices();
 builder.Services.AddAutoMapper(cfg =>
 {

@@ -10,8 +10,6 @@ namespace BlogApi.Application.Dtos
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-
-
         public int? TagCount { get; set; }
         public int? PostId { get; set; }
       

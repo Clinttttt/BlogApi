@@ -26,9 +26,7 @@ namespace BlogApi.Application.Dtos
         public int CommentCount { get; set; }
         public int? ViewCount { get; set; }
         public int PostLike { get; set; }
-        public string? Preview => Photo != null && PhotoContent != null
-        ? $"data:{PhotoContent};base64,{Convert.ToBase64String(Photo)}"
-        : null;
+        public string? Preview { get; set; }
     }
 
 }

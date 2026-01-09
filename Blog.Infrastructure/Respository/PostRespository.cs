@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Azure;
 using Azure.Core;
 using BlogApi.Application.Common.Interfaces;
@@ -12,6 +13,7 @@ using BlogApi.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -22,12 +24,19 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static BlogApi.Infrastructure.Respository.PostRespository;
 
 namespace BlogApi.Infrastructure.Respository
 {
-    public class PostRespository(IAppDbContext context) : IPostRespository
+    public class PostRespository(IAppDbContext context, IMapper mapper) : IPostRespository
     {
-        public async Task<PagedResult<Post>> GetPaginatedPostAsync(int PageNumber, int PageSize, Expression<Func<Post, bool>>? filter = null, CancellationToken cancellationToken = default)
+
+        public async Task<Result<PagedResult<PostDto>>> GetPaginatedPostDtoAsync(
+            Guid? userId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            Expression<Func<Post, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
         {
             IQueryable<Post> query = context.Posts.AsNoTracking();
 
@@ -36,92 +45,73 @@ namespace BlogApi.Infrastructure.Respository
                 query = query.Where(filter);
             }
 
-            var totalcount = await query.CountAsync();
-            var posts = await query
-              .AsNoTracking()
-              .OrderByDescending(s => s.CreatedAt)
-              .Skip((PageNumber - 1) * PageSize)
-              .Take(PageSize)
-              .Include(s => s.PostTags)
-                  .ThenInclude(s => s.tag)
-              .Include(s => s.Category)
-              .Include(s => s.BookMarks)
-              .Include(s=> s.PostLikes)
-              .Include(s=> s.Comments)
-              .Include(s => s.User)
-                  .ThenInclude(s => s.UserInfo)
-              .ToListAsync(cancellationToken);
-
-            return new PagedResult<Post>
-            {
-                Items = posts,
-                PageNumber = PageNumber,
-                PageSize = PageSize,
-                TotalCount = totalcount,
-            };
-        }
-
-        public async Task<Result<PagedResult<PostDto>>> GetPaginatedPostDtoAsync(Guid? UserIds, int PageNumber = 1, int PageSize = 10, Expression<Func<Post, bool>>? filter = null, CancellationToken cancellationToken = default)
-        {
-            var T = await GetPaginatedPostAsync(PageNumber, PageSize, filter, cancellationToken);     
-            var dto = T.Items.Select
-                            (s => new PostDto
-                            {
-                                Id = s.Id,
-                                Title = s.Title,
-                                Content = s.Content,
-                                Photo = s.Photo,
-                                PhotoContent = s.PhotoContent,
-                                Author = s.User?.UserInfo?.FullName != null ? s.User?.UserInfo.FullName : s.User?.UserName,
-                                PhotoIsliked = UserIds != null && s.PostLikes.Any(pl => pl.UserId == UserIds),
-                                CreatedAt = s.CreatedAt,
-                                CategoryName = s.Category?.Name,
-                                Status = s.Status,
-                                ViewCount = s.ViewCount,
-                                IsBookMark = s.BookMarks.Any(),
-                                CommentCount = s.Comments.Count(),
-                                PostLike = s.PostLikes.Count(),
-                                readingDuration = s.readingDuration,
-                                Tags = s.PostTags.Select(s => new TagDto
-                                {
-                                    Id = s.TagId,
-                                    Name = s.tag?.Name
-                                }).ToList()
-                            }).ToList();
-
-            return  Result<PagedResult<PostDto>>.Success(new PagedResult<PostDto>
-            {
-                Items = dto,
-                PageNumber = T.PageNumber,
-                PageSize = T.PageSize,
-                TotalCount = T.TotalCount
-            });        
-        }
+            var totalCount = await query.CountAsync(cancellationToken);
 
 
-
-
-
-
-        public async Task<List<Post>> GetNonPaginatedPostAsync(Expression<Func<Post, bool>>? filter = null, CancellationToken cancellationToken = default)
-        {
-            IQueryable<Post> query = context.Posts.AsNoTracking();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-            return await query
-                .AsNoTracking()
+            var items = await query
                 .OrderByDescending(s => s.CreatedAt)
-                .Include(s => s.PostTags)
-                    .ThenInclude(s => s.tag)
-                .Include(s => s.Category)
-                .Include(s => s.BookMarks)
-                .Include(s => s.User)
-                    .ThenInclude(s => s.UserInfo)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ProjectTo<PostDto>(mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
+
+
+            if (userId.HasValue)
+            {
+                var postIds = items.Select(p => p.Id).ToList();
+                var likedPostIds = await context.PostLikes
+                    .Where(pl => postIds.Contains(pl.PostId) && pl.UserId == userId.Value)
+                    .Select(pl => pl.PostId)
+                    .ToListAsync(cancellationToken);
+
+                var likedSet = new HashSet<int?>(likedPostIds);
+
+                foreach (var item in items)
+                {
+                    item.PhotoIsliked = likedSet.Contains(item.Id);
+                }
+            }
+            foreach (var item in items)
+            {
+                if (item.Photo != null && !string.IsNullOrEmpty(item.PhotoContent))
+                {
+                    item.Preview = $"data:{item.PhotoContent};base64,{Convert.ToBase64String(item.Photo)}";
+                }
+            }
+
+            return Result<PagedResult<PostDto>>.Success(new PagedResult<PostDto>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            });
         }
+        public async Task<List<PostDto>> GetNonPaginatedPostAsync(Expression<Func<Post, bool>>? filter = null, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Post> query = context.Posts.AsNoTracking();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            var items = await query
+                .OrderByDescending(s => s.CreatedAt)
+                .ProjectTo<PostDto>(mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+
+            foreach (var item in items)
+            {
+                if (item.Photo != null && !string.IsNullOrEmpty(item.PhotoContent))
+                {
+                    item.Preview = $"data:{item.PhotoContent};base64,{Convert.ToBase64String(item.Photo)}";
+                }
+            }
+
+            return items;
+        }
+
         public async Task<Post?> GetAsync(int postId, CancellationToken cancellationToken = default)
         {
             return await context.Posts
@@ -138,7 +128,8 @@ namespace BlogApi.Infrastructure.Respository
                         .ThenInclude(u => u.UserInfo)
                 .Include(s => s.Comments)
                     .ThenInclude(c => c.User)
-                        .ThenInclude(u => u.ExternalLogins)            
+                        .ThenInclude(u => u.ExternalLogins)
+                          .AsSplitQuery()
                 .FirstOrDefaultAsync(s => s.Id == postId, cancellationToken);
         }
 

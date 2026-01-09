@@ -1,5 +1,6 @@
 ﻿using Application.Queries.GetRecentActivity;
 using Blog.Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.Posts.GetApprovalTotal;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 using BlogApi.Application.Request.Posts;
@@ -12,19 +13,19 @@ namespace BlogApi.Client.Services
     public class PostClientService(HttpClient httpClient) : HandleResponse(httpClient), IPostClientService
     {
         public async Task<Result<int>> Create(CreatePostRequest dto)
-            => await PostAsync<CreatePostRequest, int>("api/Posts/AddPost", dto);
+            => await PostAsync<CreatePostRequest, int>("api/Posts/Create", dto);
 
         public async Task<Result<PostDetailDto>> Get(GetPostRequest request)
-            => await GetAsync<PostDetailDto>($"api/Posts/GetPost?PostId={request.PostId}");
+            => await GetAsync<PostDetailDto>($"api/Posts/Get?PostId={request.PostId}");
 
         public async Task<Result<int>> Update(UpdatePostRequest dto)
-            => await UpdateAsync<UpdatePostRequest, int>("api/Posts/UpdatePost", dto);
+            => await UpdateAsync<UpdatePostRequest, int>("api/Posts/Update", dto);
 
         public async Task<Result<bool>> Archive(ArchivePostRequest request)
-            => await UpdateAsync<bool>($"api/Posts/ArchivedPost?PostId={request.PostId}");
+            => await UpdateAsync<bool>($"api/Posts/Archived?PostId={request.PostId}");
 
         public async Task<Result<bool>> Delete(DeletePostRequest request)
-            => await DeleteAsync<bool>($"api/Posts/DeletePost?PostId={request.PostId}");
+            => await DeleteAsync<bool>($"api/Posts/Delete?PostId={request.PostId}");
 
     
 
@@ -48,6 +49,12 @@ namespace BlogApi.Client.Services
         public async Task<Result<PagedResult<PostDto>>> ListByCategory(int categoryId, ListPaginatedRequest request)
             => await GetAsync<PagedResult<PostDto>>(
                 $"api/Posts/ListByCategory/{categoryId}?PageNumber={request.PageNumber}&PageSize={request.PageSize}");
+
+        public async Task<Result<PagedResult<PostDto>>> ListByPending(ListPaginatedRequest request)
+            => await GetAsync<PagedResult<PostDto>>(
+                $"api/Posts/ListByPending?PageNumber={request.PageNumber}&PageSize={request.PageSize}");
+
+
 
         public async Task<Result<bool>> ToggleLikePost(TogglePostLikeRequest request)
             => await PostAsync<bool>($"api/Posts/ToggleLikePost?PostId={request.PostId}");
@@ -84,5 +91,9 @@ namespace BlogApi.Client.Services
             => await GetAsync<StatisticsDto>("api/Posts/GetStatistics");
         public async Task<Result<bool>> TrackPostView(int? PostId)
             => await PostAsync<bool>($"api/Posts/TrackPostView?PostId={PostId}");
+
+        public async Task<Result<GetApprovalTotalDto>> GetApprovalTotal()
+            => await GetAsync<GetApprovalTotalDto>("api/Posts/GetApprovalTotal");
+
     }
 }

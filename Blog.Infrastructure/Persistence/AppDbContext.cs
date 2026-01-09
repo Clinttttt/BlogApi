@@ -30,6 +30,10 @@ namespace BlogApi.Infrastructure.Persistence
         public DbSet<UserInfo> UserInfos { get; set; }
         public DbSet<Featured> Featureds { get; set; }
         public DbSet<PostView> PostViews { get; set; }
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

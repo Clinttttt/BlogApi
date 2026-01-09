@@ -1,53 +1,62 @@
-﻿using Blog.Application.Abstractions;
-using Blog.Application.Common.Interfaces;
+﻿using Blog.Application.Common.Interfaces;
+using Blog.Infrastructure.Services;
 using BlogApi.Application.Common.Interfaces;
 using BlogApi.Application.Dtos;
 using BlogApi.Application.Models;
 using BlogApi.Application.Queries.Posts;
 using BlogApi.Domain.Common;
-using BlogApi.Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Caching.Memory;
-using System.Linq.Expressions;
-using static BlogApi.Domain.Enums.EntityEnum;
 
-public class GetPagedPostsQueryHandler(IPostRespository repository, IPostFilterBuilder builder, IMemoryCache cache) : IRequestHandler<GetPagedPostsQuery, Result<PagedResult<PostDto>>>
+namespace BlogApi.Application.Queries.Posts.Handlers;
 
+public class GetPagedPostsQueryHandler(IPostRespository repository,IPostFilterBuilder builder, ICacheService cacheService) : IRequestHandler<GetPagedPostsQuery, Result<PagedResult<PostDto>>>
 {
-
-    public async Task<Result<PagedResult<PostDto>>> Handle(GetPagedPostsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<PostDto>>> Handle(GetPagedPostsQuery request,CancellationToken cancellationToken)
     {
-        var cacheKey = $"paginated-post-{request.FilterType}-{request.UserId}-{request.CategoryId}-{request.TagId}-{request.PageNumber}-{request.PageSize}";
-
-       
-        if (cache.TryGetValue(cacheKey, out Result<PagedResult<PostDto>>? cachedValue))
-            return cachedValue;
-
-      
-        var filter = builder.BuildFilter(request);
-        var postPage = await repository.GetPaginatedPostDtoAsync(
+        var cacheKey = CacheKeys.GetPagedPosts(
             request.UserId,
             request.PageNumber,
             request.PageSize,
-            filter: filter,
+            request.FilterType.ToString(),
+            request.TagId,
+            request.CategoryId);
+
+       
+        var expiration = GetCacheExpiration(request.FilterType);
+       
+        var result = await cacheService.GetOrCreateAsync(cacheKey,
+            async () =>
+            {
+                var filter = builder.BuildFilter(request);
+                var postPage = await repository.GetPaginatedPostDtoAsync(
+                    request.UserId,
+                    request.PageNumber,
+                    request.PageSize,
+                    filter: filter,
+                    cancellationToken);
+
+                return postPage.Value;
+            },
+            expiration,
             cancellationToken);
 
-      
-        if (!postPage.Value!.Items.Any())
+        if (result == null || !result.Items.Any())
             return Result<PagedResult<PostDto>>.NoContent();
-     
-        if (request.FilterType == PostFilterType.BookMark)
-        {
-            CacheTracker.Keys.Add(cacheKey);
-        }
- 
-        var cacheResult = Result<PagedResult<PostDto>>.Success(postPage.Value);
-        cache.Set(cacheKey, cacheResult, TimeSpan.FromMinutes(10));
 
-        return cacheResult;
+        return Result<PagedResult<PostDto>>.Success(result);
     }
-
-
+    private static TimeSpan GetCacheExpiration(PostFilterType filterType)
+    {
+        return filterType switch
+        {
+            PostFilterType.Published => CacheKeys.Expiration.Medium,
+            PostFilterType.ByTag => CacheKeys.Expiration.Medium,
+            PostFilterType.ByCategory => CacheKeys.Expiration.Medium,
+            PostFilterType.PublishedByUser => CacheKeys.Expiration.Short,
+            PostFilterType.DraftsByUser => CacheKeys.Expiration.Short,
+            PostFilterType.Pending => CacheKeys.Expiration.Short,
+            PostFilterType.BookMark => CacheKeys.Expiration.Short,
+            _ => CacheKeys.Expiration.Short
+        };
+    }
 }
-

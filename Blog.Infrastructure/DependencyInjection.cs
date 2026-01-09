@@ -21,9 +21,14 @@ namespace BlogApi.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-          
+
             services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                 options.UseSqlServer(
+                     configuration.GetConnectionString("DefaultConnection"),
+                     sqlServerOptions =>
+                     {
+                     sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                     }));
 
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddHttpClient<IGoogleTokenValidator, GoogleTokenValidator>();

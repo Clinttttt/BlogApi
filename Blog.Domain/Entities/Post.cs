@@ -17,8 +17,8 @@ namespace BlogApi.Domain.Entities
         public string? Title { get;  set; }
         public string? Content { get;  set; }
         public byte[]? Photo { get; set; }
-        public int? ViewCount { get; set; }
         public string? PhotoContent { get; set; }
+        public int? ViewCount { get; set; }
         public string? Author { get; set; }
         public Status Status { get; set; } 
         public DateTime CreatedAt { get;  set; }

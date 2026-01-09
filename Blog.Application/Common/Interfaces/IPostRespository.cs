@@ -13,13 +13,9 @@ namespace BlogApi.Application.Common.Interfaces
 {
     public interface IPostRespository
     {
-        Task<PagedResult<Post>> GetPaginatedPostAsync(
-           int PageNumber = 1,
-           int PageSize = 10,
-           Expression<Func<Post, bool>>? filter = null,
-           CancellationToken cancellationToken = default);
+     
 
-        Task<List<Post>> GetNonPaginatedPostAsync(
+        Task<List<PostDto>> GetNonPaginatedPostAsync(
             Expression<Func<Post, bool>>?
             filter = null,
             CancellationToken cancellationToken = default);

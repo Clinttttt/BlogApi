@@ -2,6 +2,7 @@
 using Azure.Core;
 using Blog.Application.Commands.Posts.TrackPostView;
 using Blog.Application.Queries.GetRecentActivity;
+using Blog.Application.Queries.Posts.GetApprovalTotal;
 using BlogApi.Api.Shared;
 using BlogApi.Application.Commands.Posts.ApprovePost;
 using BlogApi.Application.Dtos;
@@ -15,6 +16,7 @@ using BlogApi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BlogApi.Api.Controllers
 {
@@ -25,8 +27,8 @@ namespace BlogApi.Api.Controllers
         public PostsController(ISender sender) : base(sender) { }
 
         [Authorize(Roles = "Admin,Author")]
-        [HttpPost("AddPost")]
-        public async Task<ActionResult<int>> AddPost([FromBody] CreatePostRequest request)
+        [HttpPost("Create")]
+        public async Task<ActionResult<int>> Create([FromBody] CreatePostRequest request)
         {
             var command = request.ToCommand(UserId);
             var result = await Sender.Send(command);
@@ -34,8 +36,8 @@ namespace BlogApi.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("GetPost")]
-        public async Task<ActionResult<PostDetailDto>> GetPost([FromQuery] GetPostRequest request)
+        [HttpGet("Get")]
+        public async Task<ActionResult<PostDetailDto>> Get([FromQuery] GetPostRequest request)
         {
             var query = request.ToQuery(UserIdOrNull);
             var result = await Sender.Send(query);
@@ -43,8 +45,8 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,Author")]
-        [HttpPatch("UpdatePost")]
-        public async Task<ActionResult<int>> UpdatePost([FromBody] UpdatePostRequest request)
+        [HttpPatch("Update")]
+        public async Task<ActionResult<int>> Update([FromBody] UpdatePostRequest request)
         {
             var command = request.ToCommand(UserId);
             var result = await Sender.Send(command);
@@ -52,8 +54,8 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,Author")]
-        [HttpDelete("DeletePost")]
-        public async Task<ActionResult<bool>> DeletePost([FromQuery] DeletePostRequest request)
+        [HttpDelete("Delete")]
+        public async Task<ActionResult<bool>> Delete([FromQuery] DeletePostRequest request)
         {
             var command = request.ToCommand(UserId);
             var result = await Sender.Send(command);
@@ -61,8 +63,8 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,Author")]
-        [HttpPatch("ArchivedPost")]
-        public async Task<ActionResult<bool>> ArchivedPost([FromQuery] ArchivePostRequest request)
+        [HttpPatch("Archived")]
+        public async Task<ActionResult<bool>> Archived([FromQuery] ArchivePostRequest request)
         {
             var command = request.ToCommand(UserId);
             var result = await Sender.Send(command);
@@ -74,9 +76,7 @@ namespace BlogApi.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("ListPublishedForAdmin")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListPublishedForAdmin(
-             [FromQuery] ListPaginatedRequest request,
-             CancellationToken cancellationToken)
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByPublishedForAdmin([FromQuery] ListPaginatedRequest request,CancellationToken cancellationToken)
         {
             var query = new GetPagedPostsQuery
             {
@@ -91,9 +91,7 @@ namespace BlogApi.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("ListPublished")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListPublished(
-            [FromQuery] ListPaginatedRequest request,
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByPublished([FromQuery] ListPaginatedRequest request,CancellationToken cancellationToken)
         {
             var query = new GetPagedPostsQuery
             {
@@ -108,9 +106,7 @@ namespace BlogApi.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("ListDraftForAdmin")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListDraftForAdmin(
-            [FromQuery] ListPaginatedRequest request,
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByDraftForAdmin([FromQuery] ListPaginatedRequest request,CancellationToken cancellationToken)
         {
             var query = new GetPagedPostsQuery
             {
@@ -125,9 +121,7 @@ namespace BlogApi.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("ListByTag/{id}")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListByTag(
-            [FromRoute] int id,
-            [FromQuery] ListPaginatedRequest request,
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByTag([FromRoute] int id,[FromQuery] ListPaginatedRequest request,
             CancellationToken cancellationToken)
         {
             var query = new GetPagedPostsQuery
@@ -144,9 +138,7 @@ namespace BlogApi.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("ListByCategory/{id}")]
-        public async Task<ActionResult<PagedResult<PostDto>>> ListByCategory(
-            [FromRoute] int id,
-            [FromQuery] ListPaginatedRequest request,
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByCategory([FromRoute] int id,[FromQuery] ListPaginatedRequest request,
             CancellationToken cancellationToken)
         {
             var query = new GetPagedPostsQuery
@@ -161,7 +153,21 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
-  
+        [Authorize(Roles = "Admin")]
+        [HttpGet("ListByPending")]
+        public async Task<ActionResult<PagedResult<PostDto>>> ListByPending([FromQuery] ListPaginatedRequest request, CancellationToken cancellationToken)
+        {
+            var query = new GetPagedPostsQuery
+            {
+                UserId = UserIdOrNull,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                FilterType = PostFilterType.Pending,
+            };
+             var result = await Sender.Send(query, cancellationToken);
+             return HandleResponse(result);
+        }
+        
 
 
         [Authorize(Roles = "Admin,Author")]
@@ -196,6 +202,9 @@ namespace BlogApi.Api.Controllers
             var result = await Sender.Send(query);
             return HandleResponse(result);
         }
+
+
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost("AddFeatured")]
@@ -256,6 +265,10 @@ namespace BlogApi.Api.Controllers
             return HandleResponse(result);
         }
 
+
+
+
+
         [AllowAnonymous]
         [HttpPost("TrackPostView")]
         public async Task<ActionResult<bool>> TrackPostView([FromQuery] int PostId)
@@ -301,6 +314,15 @@ namespace BlogApi.Api.Controllers
         public async Task<ActionResult<bool>> ApprovePost([FromQuery] ApprovePostCommand command)
         {
             var result = await Sender.Send(command);
+            return HandleResponse(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("GetApprovalTotal")]
+        public async Task<ActionResult<GetApprovalTotalDto>> GetApprovalTotal()
+        {
+            var request = new GetApprovalTotalQuery();
+            var result = await Sender.Send(request);
             return HandleResponse(result);
         }
     }
