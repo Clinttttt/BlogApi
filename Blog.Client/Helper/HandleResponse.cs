@@ -65,16 +65,21 @@ namespace BlogApi.Client.Helper
 
         public async Task<Result<TResponse>> MapStatusCodeAsync<TResponse>(HttpResponseMessage response)
         {
-
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>();
-                string combinedErrors = errorResponse?.Errors != null
-                   ? string.Join("; ", errorResponse.Errors.SelectMany(kvp => kvp.Value))
-                   : "Validation failed";
 
-                return Result<TResponse>.Failure(combinedErrors, 400);
+                if (errorResponse?.Errors != null && errorResponse.Errors.Any())
+                {
+                   
+                    return Result<TResponse>.ValidationFailure(errorResponse.Errors);
+                }
+
+                
+                return Result<TResponse>.Failure("Bad request", 400);
             }
+
+
 
             return response.StatusCode switch
             {

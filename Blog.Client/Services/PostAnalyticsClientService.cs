@@ -20,7 +20,7 @@ namespace BlogApi.Client.Services
         public async Task<Result<UnreadDto>> GetAdminUnreadTotal()
          => await GetAsync<UnreadDto>("api/PostAnalytics/GetAdminUnreadTotal");
 
-        public async Task<Result<List<RecentActivityItemDto>>> GetRecentActivity(int limit = 5, int daysBack = 7)
-            => await GetAsync<List<RecentActivityItemDto>>($"api/PostAnalytics/GetRecentActivity?limit={limit}&daysBack={daysBack}");
+        public async Task<Result<UserProfileStatsDto>> GetUserProfileStats(int limit = 5, int daysBack = 7)
+            => await GetAsync<UserProfileStatsDto>($"api/PostAnalytics/GetUserProfileStats?limit={limit}&daysBack={daysBack}");
     }
 }

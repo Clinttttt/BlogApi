@@ -1,4 +1,4 @@
-﻿using Azure;
+﻿
 using Blog.Application.Queries.User.Get;
 using Blog.Application.Queries.User.GetListAuthor;
 using BlogApi.Application.Commands.Newsletter.UnSubscribeToNewsletter;

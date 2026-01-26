@@ -16,16 +16,31 @@ namespace BlogApi.Domain.Common
         public T? Value { get; }
         public int StatusCode { get; set; }
         public string? Error { get; set; }
+        public Dictionary<string, string[]>? ValidationErrors { get; set; }
         private Result(bool isSuccess, T? value,  int statusCode = 200, string? error = null) 
         {
             IsSuccess = isSuccess;
             Value = value;
             StatusCode = statusCode;
             Error = isSuccess ? null : error;
-           
+            ValidationErrors = null;
+
         }
         public static Result<T> Success(T value) => new(true, value);
         public static Result<T> Failure(string error, int StatusCode = 400) => new(false, default, StatusCode, error);
+
+        public static Result<T> ValidationFailure(Dictionary<string, string[]> errors)
+        {
+            return new Result<T>(
+                isSuccess: false,
+                value: default,
+                statusCode: 400,
+                error: string.Join("; ", errors.Values)
+            )
+            {
+                ValidationErrors = errors
+            };
+        }
 
         public static Result<T> NotFound() => new(false, default, 404);
         public static Result<T> Unauthorized() => new(false, default, 401);

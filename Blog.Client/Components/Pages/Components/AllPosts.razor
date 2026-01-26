@@ -1,51 +1,7 @@
-﻿@using Blog.Client.Realtime
+﻿﻿@using Blog.Client.Realtime
 
-@if (isLoading)
-{
-    <div class="space-y-6">
-        @for (int i = 0; i < 3; i++)
-        {
-            <article class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-pulse">
-                <div class="relative w-full h-80 bg-gray-200"></div>
-                <div class="p-6 lg:p-8">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="h-10 bg-gray-200 rounded w-3/4"></div>
-                        <div class="h-6 bg-gray-200 rounded w-24 flex-shrink-0 ml-4"></div>
-                    </div>
-                    <div class="flex items-center gap-6 text-sm mb-5 pb-5 border-b border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                            <div class="h-4 bg-gray-200 rounded w-24"></div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 bg-gray-200 rounded"></div>
-                            <div class="h-4 bg-gray-200 rounded w-20"></div>
-                        </div>
-                    </div>
-                    <div class="space-y-2 mb-6">
-                        <div class="h-4 bg-gray-200 rounded w-full"></div>
-                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-                        <div class="h-4 bg-gray-200 rounded w-4/6"></div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        @for (int j = 0; j < 4; j++)
-                        {
-                            <div class="h-8 bg-gray-200 rounded-lg w-20"></div>
-                        }
-                    </div>
-                    <div class="flex items-center justify-between pt-5 border-t border-gray-100">
-                        <div class="flex items-center gap-6">
-                            <div class="h-6 bg-gray-200 rounded w-16"></div>
-                            <div class="h-6 bg-gray-200 rounded w-16"></div>
-                        </div>
-                        <div class="h-12 bg-gray-200 rounded-xl w-32"></div>
-                    </div>
-                </div>
-            </article>
-        }
-    </div>
-}
-else if (recentPost?.Items?.Any() == true)
+
+ @if (recentPost?.Items?.Any() == true)
 {
     <div class="space-y-6 mb-6">
         @foreach (var post in recentPost.Items)
@@ -157,7 +113,7 @@ else if (recentPost?.Items?.Any() == true)
         }
     </div>
 
-   
+
     <Pagination CurrentPage="@Pagination.PageNumber"
                 TotalCount="@recentPost.TotalCount"
                 PageSize="@Pagination.PageSize"
@@ -171,12 +127,12 @@ else
         </svg>
         <h3 class="text-2xl font-bold text-gray-900 mb-2">No posts found</h3>
         <p class="text-gray-600 mb-6">Start creating amazing content for your readers</p>
-        <button class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
+        <NavLink href="create-post" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Create Your First Post
-        </button>
+        </NavLink>
     </div>
 }
 
@@ -199,7 +155,7 @@ else
         isLoading = recentPost == null || !recentPost.Items?.Any() == true;
     }
 
-   
+
 
     public async Task ToggleLikePost(int? PostId)
     {

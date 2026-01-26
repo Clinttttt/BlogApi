@@ -63,11 +63,12 @@ namespace BlogApi.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("GetRecentActivity")]
-        public async Task<ActionResult<List<RecentActivityItemDto>>> GetRecentActivity([FromQuery] int limit = 4, [FromQuery] int daysBack = 7)
+        [HttpGet("GetUserProfileStats")]
+        public async Task<ActionResult<UserProfileStatsDto>> GetUserProfileStats([FromQuery] int limit = 4, [FromQuery] int daysBack = 7)
         {
-            var query = new RecentActivityQuery
+            var query = new GetUserProfileStatsQuery
             {
+                UserId = UserId,
                 Limit = limit,
                 DaysBack = daysBack
             };

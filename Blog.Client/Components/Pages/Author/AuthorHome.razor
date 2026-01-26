@@ -1,7 +1,5 @@
 ﻿@page "/author"
-@using Blog.Client.Realtime
-
-
+@attribute [Authorize(Roles = "Author")]
 
 
 <div class="min-h-screen bg-gray-50 py-8">
@@ -103,7 +101,7 @@
         else if (PostViewState.AuthorPageView == PostViewState.AuthorPostState.bookmarks)
         {
 
-            <BookMarks />
+            <BookMarks TriggeredAllPost="TriggeredAllPost" />
 
         }
     </div>
@@ -138,11 +136,16 @@
     private bool _isSubscribedToSignalR = false;
 
 
-    
+
     private PagedResult<PostDto>? ListDraftByUser { get; set; } = new PagedResult<PostDto>();
     private PagedResult<PostDto>? ListPublishedByUser { get; set; } = new PagedResult<PostDto>();
     private ListPaginatedRequest PaginationPublished { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 9 };
     private ListPaginatedRequest PaginationDraft { get; set; } = new ListPaginatedRequest { PageNumber = 1, PageSize = 9 };
+
+    public void TriggeredAllPost()
+    {
+        PostViewState.AuthorView(PostViewState.AuthorPostState.all_post);
+    }
 
     public async Task RefreshPublishedAsync()
     {

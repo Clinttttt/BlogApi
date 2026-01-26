@@ -52,6 +52,7 @@ namespace BlogApi.Application.Queries.Posts.GetPostWithComments
                 CategoryId = result.CategoryId,
                 Photo = result.Photo,
                 ViewCount = result.ViewCount,
+                BookMarkCount = result.BookMarks.Count(),
                 PhotoContent = result.PhotoContent,
                 Author = result.Author,
                 readingDuration = result.readingDuration,

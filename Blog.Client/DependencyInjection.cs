@@ -1,5 +1,4 @@
-﻿
-using Blog.Client.Interface;
+﻿using Blog.Client.Interface;
 using Blog.Client.Realtime;
 using Blog.Client.Security;
 using Blog.Client.Services;
@@ -37,19 +36,27 @@ namespace BlogApi.Client
             services.AddScoped<AuthorizationDelegatingHandler>();
             services.AddScoped<RefreshTokenDelegatingHandler>();
 
+            var apiBase = configuration["LocalHost"]!;
+
+            if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+            {
+                apiBase = configuration["DockerHost"]!;
+
+            }        
+         
             services.AddHttpClient<IAuthClientService, AuthClientService>("AuthClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7096");
+                client.BaseAddress = new Uri(apiBase);
             });
 
             services.AddHttpClient("Api", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7096");
+                client.BaseAddress = new Uri(apiBase);
             })
                 .AddHttpMessageHandler<RefreshTokenDelegatingHandler>()
                 .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationDelegatingHandler>());
 
-         
+            
             services.AddScoped<IPostClientService>(sp =>
             {
                 var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();

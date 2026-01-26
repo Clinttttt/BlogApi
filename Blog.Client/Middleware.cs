@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BlogApi.Client.Security;
+using Microsoft.AspNetCore.Http;
 
 namespace BlogApi.Client.Middleware
 {
@@ -21,24 +22,17 @@ namespace BlogApi.Client.Middleware
 
                 if (!string.IsNullOrEmpty(accessToken))
                 {
-                    context.Response.Cookies.Append("AccessToken", accessToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTimeOffset.UtcNow.AddDays(1)
-                    });
+                    context.Response.Cookies.Append("AccessToken", accessToken, CookieHelper.BuildCookieOptions(context));
+
+
                 }
 
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    context.Response.Cookies.Append("RefreshToken", refreshToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTimeOffset.UtcNow.AddDays(7)
-                    });
+                    context.Response.Cookies.Append("RefreshToken", refreshToken, CookieHelper.BuildCookieOptions(context, days: 7));
+
+
+
                 }
 
                 // Redirect to home after setting cookies

@@ -1,0 +1,62 @@
+
+
+services:
+  blog.api:
+    volumes:
+       - blog-dpkeys:/root/.aspnet/DataProtection-Keys
+    image: ${DOCKER_REGISTRY-}blogapi
+    container_name: blog.api
+    build:
+      context: .
+      dockerfile: Blog.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ASPNETCORE_URLS: http://+:5000
+      
+    ports:
+     - "5063:5000"
+    networks:  
+     - blog-network
+    depends_on:
+     - blog.database
+
+
+  blog.client:
+    volumes:
+       - blog-dpkeys:/root/.aspnet/DataProtection-Keys
+    image: ${DOCKER_REGISTRY-}blogclient
+    container_name: blog.client
+    build:
+      context: .
+      dockerfile: Blog.Client/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DockerHost: http://blog.api:5000
+    ports:
+       - "8000:8080"
+    depends_on:
+     - blog.api
+    networks:
+     - blog-network
+  
+  blog.database:
+    image: postgres:latest
+    container_name: blog.database
+    environment:
+      - POSTGRES_DB=BlogDb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=clintsullano19
+    volumes:
+      - ./.containers/blog-db:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      - blog-network
+
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  blog-dpkeys:

@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+﻿
 using BlogApi.Client.Interface;
 using BlogApi.Client.Security;
 using Microsoft.AspNetCore.Components;

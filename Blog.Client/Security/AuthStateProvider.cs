@@ -19,26 +19,28 @@ namespace BlogApi.Client.Security
             {
                 var httpContext = _httpContextAccessor.HttpContext;
 
+               
                 if (httpContext == null)
-                    return Anonymous();
+                    return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
 
                 if (!httpContext.Request.Cookies.TryGetValue("AccessToken", out var token) ||
                     string.IsNullOrWhiteSpace(token))
-                    return Anonymous();
+                    return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
 
                 token = token.Trim().Trim('"').Trim();
-
                 var user = JwtHelper.ParseToken(token);
-                if (user == null)
-                    return Anonymous();
 
-                return Task.FromResult(new AuthenticationState(user));
+                return Task.FromResult(user == null
+                    ? new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))
+                    : new AuthenticationState(user));
             }
             catch
             {
-                return Anonymous();
+                return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
             }
         }
+
+
         public async Task<string?> GetUserIdAsync()
         {
             var state = await GetAuthenticationStateAsync();

@@ -1,5 +1,5 @@
 ﻿@page "/create-post"
-@using Blog.Client.Realtime
+@attribute [Authorize(Roles = "Admin,Author")]
 
 <div class="h-screen  overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -68,7 +68,12 @@
                             <InputText @bind-Value="Post.Title"
                                        placeholder="Write a compelling title that captures attention..."
                                        class="w-full px-4 py-3.5 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400 bg-gray-50 hover:bg-white" />
-                        </div>
+
+                            @if (!string.IsNullOrEmpty(titleError))
+                            {
+                                <p class="text-sm text-red-600 font-medium">⚠️ @titleError</p>
+                            }
+                                   </div>
 
 
                         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-indigo-100/50 p-6 hover:shadow-xl transition-all duration-300">
@@ -140,13 +145,40 @@
                                 }
                                 else
                                 {
-                                    <Editor ApiKey="pfj9zo4978ac5u36pu475q5zttfik7j191xq1ktkjhgxi4ct"
-                                            @bind-Value="Post.Content"
-                                            Field="@(() => Post.Content)"
-                                            Conf="@editorConf" />
+                                    <div @ref="editorElement"></div>
+                                  
                                 }
                             </div>
+            
+                    </div>
+                        <div class="rounded-xl overflow-hidden shadow-sm flex-1 border border-indigo-100">
+                            @if (isEditorLoading)
+                            {
+                                <div class="w-full h-96 bg-gradient-to-br from-gray-50 to-indigo-50/30 animate-pulse p-6 space-y-4">
+                                    <div class="h-10 bg-gray-200/70 rounded-lg"></div>
+                                    <div class="h-8 bg-gray-200/70 rounded-lg w-3/4"></div>
+                                    <div class="h-6 bg-gray-200/70 rounded-lg w-1/2"></div>
+                                    <div class="space-y-3 pt-4">
+                                        <div class="h-4 bg-gray-200/70 rounded"></div>
+                                        <div class="h-4 bg-gray-200/70 rounded w-5/6"></div>
+                                        <div class="h-4 bg-gray-200/70 rounded w-4/5"></div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div @ref="editorElement"></div>
+                                if (!string.IsNullOrEmpty(contentError))
+                                {
+                                    <p class="text-sm text-red-600 font-medium">⚠️ @contentError</p>
+
+
+                                }
+                            }
                         </div>
+
+
+
                     </div>
 
 
@@ -192,7 +224,13 @@
                                     <InputText @bind-Value="Post.Author"
                                                placeholder="Your name"
                                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white" />
-                                </div>
+                                    @if (!string.IsNullOrEmpty(authorError))
+                                    {
+                                        <p class="text-sm text-red-600 font-medium">⚠️ @authorError</p>
+                                     
+                                   
+                                    }
+                                           </div>
 
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Publish Date</label>
@@ -492,15 +530,83 @@
     private string previewImageUrl = string.Empty;
     private string tagError = string.Empty;
     private string categoryError = string.Empty;
+    private string? titleError = string.Empty;
+    private string? contentError = string.Empty;
+    private string? authorError = string.Empty;
 
     public DateTime PublishedDate { get; set; }
-    private Dictionary<string, object> editorConf = TinyMCEConfig.GetConfig();
+    private ElementReference editorElement;
+    private IJSObjectReference? quillInstance;
 
     protected override async Task OnInitializedAsync()
     {
         await AuthState();
         await LoadDataAsync();
         await LoadUserName();
+    }
+
+
+    private bool editorInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!isEditorLoading && !editorInitialized)
+        {
+            editorInitialized = true;
+
+            await Task.Delay(100);
+
+            try
+            {
+                Console.WriteLine("Attempting to initialize Quill editor...");
+
+                var toolbar = QuillConfig.GetToolbarConfig();
+                quillInstance = await JS.InvokeAsync<IJSObjectReference>(
+                    "initQuill",
+                    editorElement,
+                    Post.Content ?? "",
+                    toolbar
+                );
+
+                if (quillInstance != null)
+                {
+                    Console.WriteLine("Quill instance created successfully");
+
+                    // Inject custom styles
+                    var styles = QuillConfig.GetContentStyle();
+                    await JS.InvokeVoidAsync("injectQuillStyles", styles);
+
+                    // Keep showing skeleton until editor is fully rendered
+                    await Task.Delay(200);
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing Quill: {ex.Message}");
+                editorInitialized = false;
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    private async Task<string> GetEditorContent()
+    {
+        if (quillInstance != null)
+        {
+            return await JS.InvokeAsync<string>("getQuillContent", quillInstance);
+        }
+        return string.Empty;
     }
 
     public async Task AuthState()
@@ -540,11 +646,16 @@
         isLoading = false;
         StateHasChanged();
 
-        await Task.Delay(1000);
+
+        await Task.Delay(300);
 
         isEditorLoading = false;
         StateHasChanged();
     }
+
+
+
+
 
     private void SelectCategory(int categoryId)
     {
@@ -665,8 +776,12 @@
     private async Task HandlePublish()
     {
         isSaving = true;
+        Post.Content = await GetEditorContent(); // Get content from Quill
         Post.Status = EntityEnum.Status.Published;
         Post.TagIds = selectedTags;
+        titleError = string.Empty;
+        contentError = string.Empty;
+        authorError = string.Empty;
 
         var result = await PostClient.Create(Post);
 
@@ -674,13 +789,34 @@
         {
             Navigation.NavigateTo("/");
         }
+        else if (result?.ValidationErrors != null && result.ValidationErrors.Any())
+        {
+            if (result.ValidationErrors.TryGetValue("Title",out var TitleErr))
+            
+                titleError = TitleErr.FirstOrDefault();
+            
+            if (result.ValidationErrors.TryGetValue("Content",out var contentErr))           
+                contentError = contentErr.FirstOrDefault();
 
+            if (result.ValidationErrors.TryGetValue("Author", out var authorErr))
+                authorError = authorErr.FirstOrDefault();
+        }   
+        
+        
         isSaving = false;
     }
 
+     public async ValueTask DisposeAsync()
+    {
+        if (quillInstance != null)
+        {
+            await quillInstance.DisposeAsync();
+        }
+    }
     private async Task SaveDraft()
     {
         isSaving = true;
+        Post.Content = await GetEditorContent(); // Get content from Quill
         Post.Status = EntityEnum.Status.Draft;
         Post.TagIds = selectedTags;
 

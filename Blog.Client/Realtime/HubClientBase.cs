@@ -28,7 +28,9 @@ namespace Blog.Client.Realtime
             ITokenService tokenService)
         {
             _navigationManager = navigationManager;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "https://localhost:7096";
+            _apiBaseUrl = Environment.GetEnvironmentVariable("DockerHost") ?? configuration["LocalHost"]!;
+             
+
             _tokenService = tokenService;
         }
 
@@ -58,7 +60,7 @@ namespace Blog.Client.Realtime
             }
             catch (ObjectDisposedException)
             {
-                // Hub connection was disposed during initialization
+              
             }
             catch
             {

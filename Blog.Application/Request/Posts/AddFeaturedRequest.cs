@@ -9,7 +9,7 @@ namespace BlogApi.Application.Request.Posts
 {
     public class AddFeaturedRequest
     {
-        public int PostId { get; set; }
+        public int? PostId { get; set; }
 
         public AddFeaturedCommand ToCommand(Guid userId)
             => new(PostId, userId);

@@ -3,10 +3,12 @@
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 
+# Create DP keys directory and fix ownership
+RUN mkdir -p /var/lib/dpkeys \
+    && chown -R app:app /var/lib/dpkeys
+
 WORKDIR /app
-# Listen on port 80 for cloud platforms
-ENV ASPNETCORE_URLS=http://+:80
-EXPOSE 80
+
 
 
 # This stage is used to build the service project

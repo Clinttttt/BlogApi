@@ -28,6 +28,8 @@ namespace BlogApi.Client.Security
                     !string.IsNullOrWhiteSpace(token))
                 {
                     token = token.Trim().Trim('"').Trim();
+                  
+
                     request.Headers.Authorization =
                         new AuthenticationHeaderValue("Bearer", token);
                 }

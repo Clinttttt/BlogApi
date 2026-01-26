@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace BlogApi.Application.Commands.Posts.Featured.AddFeatured
 {
-    public record AddFeaturedCommand(int PostId, Guid UserId) : IRequest<Result<bool>>;
+    public record AddFeaturedCommand(int? PostId, Guid UserId) : IRequest<Result<bool>>;
    
 }

@@ -29,13 +29,24 @@ namespace BlogApi.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+         
+            if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+            {
+                connectionString = connectionString?.Replace("localhost", "blog.database");
+                Console.WriteLine($"🐳 Running in Docker - Using connection: {connectionString}");
+            }
+
             services.AddDbContext<AppDbContext>(options =>
-                 options.UseSqlServer(
-                     configuration.GetConnectionString("DefaultConnection"),
-                     sqlServerOptions =>
-                     {
-                         sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                     }));
+                options.UseNpgsql(
+                    connectionString!, 
+                    npgsqlOptions =>   
+                    {
+                        npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    }));
+
+
 
 
             services.AddScoped<IAppDbContext, AppDbContext>();

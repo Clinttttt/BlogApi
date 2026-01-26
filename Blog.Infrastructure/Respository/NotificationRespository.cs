@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+﻿
 using Blog.Application.Common.Interfaces.Repositories;
 using Blog.Application.Queries.Notification.GetListNotification;
 using Blog.Application.Queries.Posts.GetApprovalTotal;

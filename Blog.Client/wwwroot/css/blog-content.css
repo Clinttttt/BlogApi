@@ -1,0 +1,169 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.blog-content,
+.ql-editor {
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 16px;
+	line-height: 1.8;
+	color: #1f2937;
+}
+
+	.blog-content h1,
+	.blog-content h2,
+	.blog-content h3,
+	.blog-content h4,
+	.blog-content h5,
+	.blog-content h6 {
+		font-weight: 700;
+		line-height: 1.3;
+		margin-top: 1.5em;
+		margin-bottom: 0.5em;
+		color: #111827;
+	}
+
+
+	.blog-content h1 {
+		font-size: 2.25em;
+	}
+
+	.blog-content h2 {
+		font-size: 1.875em;
+	}
+
+	.blog-content h3 {
+		font-size: 1.5em;
+	}
+
+	.blog-content h4 {
+		font-size: 1.25em;
+	}
+
+	.blog-content p {
+		margin-bottom: 1.25em;
+		margin-top: 0;
+	}
+
+	.blog-content strong,
+	.blog-content b {
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.blog-content em,
+	.blog-content i {
+		font-style: italic;
+	}
+
+	.blog-content u {
+		text-decoration: underline;
+	}
+
+	.blog-content s,
+	.blog-content strike {
+		text-decoration: line-through;
+	}
+
+	.blog-content sup {
+		vertical-align: super;
+		font-size: 0.75em;
+	}
+
+	.blog-content sub {
+		vertical-align: sub;
+		font-size: 0.75em;
+	}
+
+	.blog-content a {
+		color: #6366f1;
+		text-decoration: underline;
+	}
+
+		.blog-content a:hover {
+			color: #4f46e5;
+		}
+
+	/* Inline code */
+	.blog-content code {
+		background: #f3f4f6;
+		color: #dc2626;
+		padding: 3px 8px;
+		border-radius: 6px;
+		font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace;
+		font-size: 0.9em;
+		font-weight: 500;
+		border: 1px solid #e5e7eb;
+	}
+
+	/* Hide the language dropdown on view page */
+	.blog-content .ql-code-block-container {
+		position: relative;
+	}
+
+	.blog-content .ql-ui {
+		display: none !important;
+	}
+
+	/* Code blocks with dark background */
+	.blog-content pre,
+	.blog-content .ql-syntax,
+	.blog-content .ql-code-block-container {
+		background: #1e293b !important;
+		padding: 20px !important;
+		margin: 1.5em 0 !important;
+		overflow-x: auto !important;
+		border-radius: 8px !important;
+		position: relative !important;
+	}
+
+		.blog-content pre *,
+		.blog-content .ql-syntax *,
+		.blog-content .ql-code-block-container * {
+			color: #e5e7eb !important;
+			font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace !important;
+			font-size: 14px !important;
+			line-height: 1.7 !important;
+			background: transparent !important;
+		}
+
+		/* Override inline code inside pre */
+		.blog-content pre code {
+			background: transparent !important;
+			color: inherit !important;
+			padding: 0 !important;
+			border: none !important;
+			font-weight: normal !important;
+		}
+
+	.blog-content ul,
+	.blog-content ol {
+		padding-left: 1.5em;
+		margin-bottom: 1.25em;
+		margin-top: 0;
+	}
+
+	.blog-content li {
+		margin-bottom: 0.5em;
+	}
+
+	.blog-content blockquote {
+		border-left: 4px solid #6366f1;
+		padding: 1em 1.5em;
+		margin: 1.5em 0;
+		color: #4b5563;
+		font-style: italic;
+		background: #f9fafb;
+		border-radius: 0 8px 8px 0;
+	}
+
+	.blog-content img {
+		max-width: 100%;
+		height: auto;
+		border-radius: 8px;
+		margin: 1.5em 0;
+	}
+
+
+
+
+
+

@@ -56,6 +56,11 @@ namespace BlogApi.Api.Shared
                 return Ok(result.Value);
             return result.StatusCode switch
             {
+                400 => result.ValidationErrors != null && result.ValidationErrors.Any() ? BadRequest(new
+                {
+                    isSuccess = false,
+                    errors = result.ValidationErrors
+                }) : BadRequest(),
                 404 => NotFound(),
                 401 => Unauthorized(),
                 403 => Forbid(),

@@ -25,6 +25,7 @@ namespace BlogApi.Application.Dtos
         public ReadingDuration readingDuration { get; set; }
         public int PostLike { get; set; }
         public int CommentCount { get; set; }
+        public int BookMarkCount { get; set; }
         public bool PhotoIsliked { get; set; }
         public bool IsBookMark { get; set; }
         public Status Status { get; set; }

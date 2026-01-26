@@ -1,8 +1,6 @@
 ﻿@page "/admin_home"
+@attribute [Authorize(Roles = "Admin")]
 
-@using Blog.Application.Queries.Posts.GetApprovalTotal
-@using Blog.Client.Realtime
-@using Microsoft.AspNetCore.SignalR.Client
 
 <main class="p-6 lg:p-8 max-w-7xl w-full overflow-auto h-screen ">
 
@@ -206,7 +204,7 @@
     }
     else if (PostViewState.AdminPageView == PostViewState.AdminPostState.published)
     {
-        <Blog.Client.Components.Pages.Components.ManagePosts ListPostFilterByUser="ListPublishedByUser" Pagination="PaginationPublished" Refresh="RefreshPublishedAsync" OnLoadMore="LoadPublishedPostByUserAsync" />
+        <Blog.Client.Components.Pages.Components.ManagePosts ListPostFilterByUser="ListPublishedByUser" Pagination="PaginationPublished" Refresh="RefreshPublishedAsync" OnLoadMore="LoadPublishedPostByUserAsync" RefreshFeaturedAsync="RefreshFeaturedAsync" />
     }
     else if (PostViewState.AdminPageView == PostViewState.AdminPostState.draft)
     {
@@ -263,7 +261,7 @@
     {
         PostViewState.AdminView(PostViewState.AdminPostState.author);
 
-      
+
         await JS.InvokeVoidAsync("eval", "document.activeElement.blur()");
     }
 
@@ -373,9 +371,8 @@
         await LoadPublishedPostByUserAsync();
         await LoadDraftPostByUserAsync();
     }
-
-
     public async Task RefreshAsync() => await LoadPublishedPostsAsync();
+    public async Task RefreshFeaturedAsync() => await ListFeatured();
 
     private async Task ListFeatured()
     {

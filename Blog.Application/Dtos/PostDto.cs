@@ -30,6 +30,7 @@ namespace BlogApi.Application.Dtos
         public int PostLikeCount { get; set; }
         public int? BookMarkCount { get; set; }
         public string? Preview { get; set; }
+        public bool IsFeatured { get; set; }
     }
 
 }

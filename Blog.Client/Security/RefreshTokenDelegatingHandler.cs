@@ -1,5 +1,6 @@
 ﻿using BlogApi.Application.Dtos;
 using BlogApi.Client.Interface;
+using BlogApi.Client.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
@@ -75,19 +76,12 @@ namespace Blog.Client.Security
             if (!result.IsSuccess || result.Value == null)
                 return false;
 
-            ctx.Response.Cookies.Append("AccessToken", result.Value.AccessToken!, CookieOptions());
-            ctx.Response.Cookies.Append("RefreshToken", result.Value.RefreshToken!, CookieOptions(days: 7));
+            ctx.Response.Cookies.Append("AccessToken", result.Value.AccessToken!, CookieHelper.BuildCookieOptions(ctx));
+            ctx.Response.Cookies.Append("RefreshToken", result.Value.RefreshToken!, CookieHelper.BuildCookieOptions(ctx, days: 7));
 
             return true;
         }
 
-        private static CookieOptions CookieOptions(int days = 1) =>
-            new()
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(days)
-            };
+       
     }
 }

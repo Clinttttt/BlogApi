@@ -22,7 +22,7 @@ namespace Blog.Application.Abstractions
             return request.FilterType switch
             {
                 PostFilterType.Published =>
-                    p => p.Status == Status.Published,
+                    p => p.Status == Status.Published && !p.Featured.Any(x => x.PostId == p.Id),
 
                 PostFilterType.PublishedByUser =>
                     p => p.UserId == request.UserId && p.Status == Status.Published,

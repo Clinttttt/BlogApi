@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Azure;
-using Azure.Core;
+
 using Blog.Application.Common.Interfaces.Repositories;
 using Blog.Application.Queries.Posts.GetAdminRequest;
 using BlogApi.Application.Dtos;
@@ -51,6 +50,7 @@ namespace BlogApi.Infrastructure.Respository
                     Id = p.Id,
                     UserId = p.UserId,
                     Title = p.Title,
+                    IsFeatured = p.Featured.Any(s=> s.PostId == p.Id),
                     Content = p.Content,
                     CreatedAt = p.CreatedAt,
                     Status = p.Status,
